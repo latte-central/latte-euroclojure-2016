@@ -24,8 +24,23 @@
    ((t
      (:height 2.0
       :foreground "slate blue"))))
- )
 
+ '(live-clojure-talks-subtitle-face
+   ((t
+     (:height 1.5
+      :foreground "medium slate blue"))))
+
+'(live-clojure-talks-subsubtitle-face
+   ((t
+     (:height 1.0
+      :foreground "light slate blue"))))
+
+'(live-clojure-talks-button-face
+  ((t
+    (:slant italic :foreground "IndianRed1" :inherit
+	    (custom-button)))))
+
+ )
 
 (require 'package) ;; You might already have this line
 (add-to-list 'package-archives
@@ -40,6 +55,10 @@
 
 (setq nrepl-hide-special-buffers t)
 
+(setq cider-repl-display-help-banner nil)
+
+;; (setq cider-eval-result-prefix ";; => ")
+
 ;; disable menu bar (but allows popup menus)
 (menu-bar-mode -99)
 
@@ -50,3 +69,10 @@
 (setq split-width-threshold 9999)
 
 (require 'live-clojure-talks)
+
+;; key bindings
+
+(global-set-key (kbd "C-=") 'text-scale-decrease)
+(global-set-key (kbd "C-+") 'text-scale-increase)
+
+(global-set-key (kbd "C-œ") 'live-clojure-talks-mode)
