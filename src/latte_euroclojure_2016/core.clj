@@ -1,5 +1,11 @@
 
-;; # LaTTe@Euroclojure 2016
+;;; # Live-coding Mathematics: your first Clojure proof
+
+;;; ## (LaTTe@Euroclojure 2016)
+
+
+
+;;; # Let's begin ...
 
 (ns latte-euroclojure-2016.core
   "This is a talk about LaTTe given @ Euroclojure 2016."
