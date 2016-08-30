@@ -271,35 +271,50 @@ latte.prop/and-intro
 
 ;;; ## Proof assistant
 ;;; a tool that allows to describe mathematical content on
-;;; a computer, and assists in the principal activity of
-;;; mathematicians: proving things!
+;;; a computer, and assists in the mathematician's routine: proving things!
 
 ;;; ## About LaTTe
 ;;; unlike most assistants, LaTTe is not a standalone application
-;;; but a (Clojure) library (other examples are: HOL4 and HOL light).
+;;; but a (Clojure) library (available on Clojars!).
 
 ;;; ## Main features
 ;;; - the kernel is a lambda-calculus with dependent types
-;;;   (sometimes called λD of the calculus of constructions)
-;;; - it proposes top-level (Clojure) forms for definitions, axioms, declaration
+;;;   (sometimes called λD or the calculus of constructions)
+;;; - it proposes top-level Clojure forms for definitions, axioms, declaration
 ;;;   of theorems and encoding of proofs
 ;;; - it supports a DSL for declarative proof scripts <<<<-- hot!|||t>>>
 ;;; - it leverages the Clojure (JVM/Maven) ecosystem for <<<proving in the large|||t>>>
+;;; - any Clojure Dev. Env. can be used to do maths! 
+;;;   (I use Cider and Gorilla Repl...)
 
 
 
-;;; # Our first theorem ...
+;;; # Our first theorems ...
 
-(defthm first-theorem
+(defthm and-elim-right
+  "Right elimination for conjunction."
+  [[A :type] [B :type]]
+  (==> (and A B)
+       B))
+
+(defthm dummy-theorem
   "This is an example theorem"
   [[A :type] [B :type] [C :type]]
   (==> (==> A B) (and C A)
        B))
 
-
-(proof first-theorem
+(proof dummy-theorem
     :term
   (lambda [H1 (==> A B)]
     (lambda [H2 (and C A)]
-      (H1 ((p/and-elim-right C A) H2)))))
+      (H1 ((and-elim-right C A) H2)))))
+
+
+
+;;; # Let's do some real maths...
+
+;;; Our objective is to encode in LaTTe the <<<Peano arithmetics|||t>>>
+;;; for natural numbers, and demontrate an important inductive property
+;;; about them...
+
 
