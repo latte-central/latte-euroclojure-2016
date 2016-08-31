@@ -1,6 +1,6 @@
 
 ;;; # Live-coding Mathematics
-;;; ## Your first Clojure proof
+;;; ## Your first Clojure proofs
 
 ;;    using the LaTTe proof assistant: <<<https://github.com/fredokun/LaTTe|||(lambda (x) (browse-url "https://github.com/fredokun/LaTTe"))>>>
 
@@ -16,10 +16,30 @@
 ;;; ### Frédéric Peschanski @ Euroclojure 2016
 
 ;;; Associate Professor at UPMC
-;; (Université Pierre & Marie Curie, Paris)
+;; (Université Pierre & Marie Curie, Paris - France)
 
 ;;; Researcher at LIP6
 ;; (Computer science laboratory)
+
+
+
+;;; # To give credit where credit is due ...
+
+
+;;; The theory underlying LaTTe (as well as its basic library)
+;;; is heavily influenced by the following book:
+
+
+;;; ## Type Theory and Formal Proof: an Introduction
+;;; ### Rob Nederpelt and Herman Geuvers
+;; Cambridge University Press, 2012
+
+;;; It is a wonderful book for (the few ?) people interested
+;;; in such topics
+
+;; (but of course, you do *not* need to read the book to
+;; use LaTTe, or hopefully to understand this talk!).
+
 
 
 
@@ -45,12 +65,12 @@
 
 
 
-;;; # You know 'lambda', right?
+;;; # You know `lambda`, right?
 
-;;; Well, in Clojure, 'lambda' is called 'fn'  (lazy guys ...)
-;;; ... and it enables first-class higher-order anonymous functions ...
+;;; Well, in Clojure, `lambda` is called `fn`  (Oh laziness!)
+;;; ... used to construct first-class anonymous functions ...
 
-;;; ### A first example: the identity function
+;;; ### A trivial example: the identity function
 
 (fn [x] x)
 
@@ -64,8 +84,8 @@
 ;;; ### Another example: binary composition
 
 ((((fn [g] (fn [f] (fn [x] (f (g x)))))
-   even?)
-   (fn [y] (if y "even" "odd")))
+   even?)                               ;; (==> int boolean)
+   (fn [y] (if y "even" "odd")))        ;; (==> boolean String)
  42)
 
 
@@ -74,13 +94,13 @@
 
 ;;; ## Church thesis
 ;;; All computable functions can be encoded in the pure lambda-calculus
-;;(only with single argument <<<fn|||t>>>'s and function application)
+;;(only with single argument <<<fn|||t>>>'s, function application and variables)
 
 ;;; ### Example: the pairing function
 
 (def pair (fn [x] (fn [y] (fn [z] ((z x) y)))))
 
-;;; and accessors
+;;; and accessors (or eliminators as you'll see)
 
 (def fst (fn [p] (p (fn [x] (fn [y] x)))))
 (def snd (fn [p] (p (fn [x] (fn [y] y)))))
@@ -93,14 +113,13 @@
 
 
 ;;; # LaTTe (kernel) = Lambda with explicit types
-
-;;; ###wait ...
+;;; ## (a.k.a. a Type Theory)
 ;;;                _..._
 ;;;              .'     '.
-;;;             /`\     /`\    |\
+;;;             /`\     /`\    |\         <<<but...|||(lambda (x) t)>>>
 ;;;            (__|     |__)|\  \\  /|
 ;;;            (     "     ) \\ || //
-;;;             \         /   \\||//
+;;;             \         /   \\||//            <<<wait!?!|||(lambda (x) t)>>>
 ;;;              \   _   /  |\|`  /
 ;;;               '.___.'   \____/
 ;;;                (___)    (___)
@@ -136,7 +155,7 @@
 (term (lambda [A :type]
         (lambda [x A] x)))
 
-;;; Let's check its type ...
+;;; Let's do some <<<type checking|||(lambda (x) t)>>>
 
 (check-type?
  (lambda [A :type]
@@ -145,8 +164,6 @@
  ;; is of type ...
 
  :type)
-
-;; This looks like an important property of <<<implication|||t>>>: reflexivity!
 
 
 
@@ -163,8 +180,23 @@
 
  :type)
 
+
 
-;; Wow! another property of implication: transitivity!
+;;; # The logical view...
+
+;;; Given arbitrary types A, B and C
+
+;;; ### - the type of the identity function on A is:
+
+;;; (==> A A)
+;; "A implies A"  (reflexivity of implication)
+
+;;; ### - the type of the composition function on A,B and C is:
+
+;;; (==> (==> A B) (==> B C)
+;;;      (==> A C))
+;; if "A implies B" and "B implies C" then "A implies C"
+;; (transitivity of implication)
 
 ;;; ==> we've just experienced <<<Proposition-as-Type|||t>>> (PaT)
 ;;;     part of the <<<Curry-Howard correspondance|||t>>>
@@ -176,7 +208,7 @@
 ;; reminder
 (def pair (fn [x] (fn [y] (fn [z] ((z x) y)))))
 
-;; type type-generic version
+;; the type-generic version
 (check-type? [A :type] [B :type] ;; <-- this is called the 'context'
    (lambda [x A]
      (lambda [y B]
@@ -185,25 +217,6 @@
            ((z x) y)))))
    ;; of type...
    :type)
-
-
-;;; # The logical view: and-intro
-
-;; In LaTTe the pairing function is:
-
-latte.prop/and-intro
-
-;; of type
-
-;;; (==> A B
-;;;      (and A B))
-
-;; And in logic (natural deduction)
-;; this is called the <<<introduction rule for conjunction|||t>>>:
-
-;;;     A      B
-;;;   ------------ (and-intro)
-;;;     (and A B)
 
 
 
@@ -213,7 +226,7 @@ latte.prop/and-intro
 (def fst (fn [p] (p (fn [x] (fn [y] x)))))
 (def snd (fn [p] (p (fn [x] (fn [y] y)))))
 
-(check-type? [A :type] [B :type] ;; <-- this is called 'the context'
+(check-type? [A :type] [B :type]
    (lambda [p (and A B)]
      ((p A) (lambda [x A] (lambda [y B] x))))
    ;; of type
@@ -231,7 +244,28 @@ latte.prop/and-intro
 
 
 
-;;; # Our first proof ...
+;;; # The missing piece
+
+;;; Logical (and thus mathematical) reasoning heavily relies on
+;;; a simple albeit powerful law: <<<modus ponens|||(lambda (x) t)>>> (a.k.a. deduction)
+
+;;; ### if we know that "A implies B"
+;;; ### and if it is the case that "A holds"
+;;; ### ... then we can deduce that "B holds" also.
+
+(check-type? [A :type] [B :type]
+   :type
+             
+   (==> (==> A B) A
+        B))
+
+;;; {hide}
+;; Modus ponens is beta-reduction (function application) it is that simple!
+;;; {show}
+
+
+
+;;; # Our first (low-level) proof ...
 
 ;;; Let's try to prove something about
 ;;; the implication and conjunction
@@ -251,11 +285,11 @@ latte.prop/and-intro
 
 ;;; ## What we learned thus far ...
 
-;;; that a lambda-calculus with types could be used to:
+;;; that a lambda-calculus with types may be used to:
 
 ;;;   1) express logical propositions as types
 
-;;;   2) prove the propositions using terms carying those types
+;;;   2) formalise proofs of the propositions as terms carrying those types
 
 ;;; ## However ...
 
@@ -281,11 +315,11 @@ latte.prop/and-intro
 ;;; - the kernel is a lambda-calculus with dependent types
 ;;;   (sometimes called λD or the calculus of constructions)
 ;;; - it proposes top-level Clojure forms for definitions, axioms, declaration
-;;;   of theorems and encoding of proofs
+;;;   of theorems and encoding of proofs (plus notations, specials, etc.)
 ;;; - it supports a DSL for declarative proof scripts <<<<-- hot!|||t>>>
 ;;; - it leverages the Clojure (JVM/Maven) ecosystem for <<<proving in the large|||t>>>
 ;;; - any Clojure Dev. Env. can be used to do maths! 
-;;;   (I use Cider and Gorilla Repl...)
+;;;   (e.g. I use both Cider and Gorilla Repl...)
 
 
 
@@ -317,4 +351,56 @@ latte.prop/and-intro
 ;;; for natural numbers, and demontrate an important inductive property
 ;;; about them...
 
+
 
+;;; # The Peano arithmetics in the blink of an eye
+
+"The first Peano primive: ℕ is a primitive set"
+
+"The second Peano primitive: 0 is in ℕ"
+
+"The third Peano primitive: the successor function of type ℕ ⟶ ℕ"
+
+"The first Peano axiom: there is no successor in ℕ that equals 0"
+
+"The second Peano axiom: the successor function is injective"
+
+"The third Peano axiom: induction principle on ℕ"
+
+
+
+;;; # A proof by induction
+
+(defthm nat-strong
+  "A natural integer is either zero or the successor of
+another integer"
+  []
+  (forall [n nat]
+    (or (equal nat n zero)
+        (exists [m nat]
+          (equal nat n (succ m))))))
+
+
+
+;;; # Yes, we could!
+;;; (I hope you enjoyed the ride...)
+
+;;; ### Mathematics can be fun, (almost) as fun as live-coding in Clojure!
+;; but ... wait.. this *is* live-coding in Clojure!
+
+;;; Formalizing and proving things is a very addictive <<<puzzle game|||(lambda (x) t)>>>
+;;; - with both a *single player mode* and *multiplayer cooperation* available!
+;; (MMO being considered)
+;;; - simple puzzles for starters: propositional logic, basic quantifiers, etc.
+;;; - and more challenging things: inductive types, numbers, etc.
+;;    (way better than Sudoku and even kakuro)
+;;; - also very difficult things: current mathematics
+;;; - and what about <<<P =/≠ NP|||(lambda (x) t)>>>?
+;;    (if you enjoy real challenges!)
+
+;;; ### Let's play together at: https://github.com/fredokun/LaTTe
+;;; you're just a `lein new my-cool-maths` away...
+;; (no? really? how unfortunate :~( )
+
+
+;;; # Thank you!
