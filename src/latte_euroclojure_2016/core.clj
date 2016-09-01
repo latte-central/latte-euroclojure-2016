@@ -285,7 +285,7 @@
 
 ;;; ## What we learned thus far ...
 
-;;; that a lambda-calculus with types may be used to:
+;;; ... that a lambda-calculus with types may be used to:
 
 ;;;   1) express logical propositions as types
 
@@ -309,17 +309,18 @@
 
 ;;; ## About LaTTe
 ;;; unlike most assistants, LaTTe is not a standalone application
-;;; but a (Clojure) library (available on Clojars!).
+;;; but a Clojure library (available on Clojars!).
+;;; ### ⟹ any Clojure Dev. Env. can be used to do maths!
+;;; (e.g. I use both Cider and Gorilla Repl, sometimes together via nrepl...)
 
 ;;; ## Main features
-;;; - the kernel is a lambda-calculus with dependent types
+;;;
+- the kernel is a lambda-calculus with dependent types
 ;;;   (sometimes called λD or the calculus of constructions)
-;;; - it proposes top-level Clojure forms for definitions, axioms, declaration
+;;; - top-level Clojure forms are provided for definitions, axioms, declaration
 ;;;   of theorems and encoding of proofs (plus notations, specials, etc.)
 ;;; - it supports a DSL for declarative proof scripts <<<<-- hot!|||t>>>
 ;;; - it leverages the Clojure (JVM/Maven) ecosystem for <<<proving in the large|||t>>>
-;;; - any Clojure Dev. Env. can be used to do maths! 
-;;;   (e.g. I use both Cider and Gorilla Repl...)
 
 
 
