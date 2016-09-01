@@ -1,4 +1,4 @@
-œ
+
 ;;; # Live-coding Mathematics
 ;;; ## Your first Clojure proofs
 
