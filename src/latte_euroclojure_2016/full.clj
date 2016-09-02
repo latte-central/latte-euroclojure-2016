@@ -68,7 +68,7 @@
 ;;; # You know `lambda`, right?
 
 ;;; Well, in Clojure, `lambda` is called `fn`  (Oh laziness!)
-;;; ... used to construct first-class anonymous functions ...
+;;; ... we use it to construct first-class anonymous functions ...
 
 ;;; ### A trivial example: the identity function
 
@@ -155,7 +155,15 @@
 (term (lambda [A :type]
         (lambda [x A] x)))
 
-;;; Let's do some <<<type checking|||(lambda (x) t)>>>
+;; e.g.:  (((lambda [A :type] (lambda [x A] x)) 42) int)
+;;        --> ((lambda [x int] x) 42)
+;;        --> 42
+
+
+
+;;; # Let's type-check ...
+
+;;; ##What is the type of the (type-generic) identity?
 
 (check-type?
  (lambda [A :type]
@@ -171,7 +179,7 @@
 
 
 
-;;; # Typing the composition function
+;;; # The type-generic composition function
 
 (check-type?
  (lambda [A B C :type]
@@ -214,7 +222,7 @@
 ;; reminder
 (def pair (fn [x] (fn [y] (fn [z] ((z x) y)))))
 
-;; the type-generic version
+;; a type-generic version
 (check-type? [A :type] [B :type] ;; <-- this is called the 'context'
    (lambda [x A]
      (lambda [y B]
@@ -233,7 +241,7 @@
 
 
 
-;;; # Elimination rules
+;;; # Accessors = elimination rules
 
 ;; reminders
 (def fst (fn [p] (p (fn [x] (fn [y] x)))))
@@ -259,10 +267,11 @@
 
 
 
-;;; # The missing piece
+;;; # Deduction ...
 
 ;;; Logical (and thus mathematical) reasoning heavily relies on
-;;; a simple albeit powerful law: <<<modus ponens|||(lambda (x) t)>>> (a.k.a. deduction)
+;;; a simple albeit powerful law: <<<modus ponens|||(lambda (x) t)>>>
+;; (a.k.a. detachment, cut, resolution, etc.)
 
 ;;; ### if we know that "A implies B"
 ;;; ### and if it is the case that "A holds"
@@ -339,17 +348,18 @@
 ;;; (e.g. I use both Cider and Gorilla Repl, sometimes together via nrepl...)
 
 ;;; ## Main features
-;;;
-- the kernel is a lambda-calculus with dependent types
-;;;   (sometimes called λD or the calculus of constructions)
+
+;;; - the kernel is a lambda-calculus with dependent types
+;;   (sometimes called λD or the calculus of constructions)
 ;;; - top-level Clojure forms are provided for definitions, axioms, declaration
-;;;   of theorems and encoding of proofs (plus notations, specials, etc.)
+;;;   of theorems and encoding of proofs
+;; (plus notations, specials, etc.)
 ;;; - it supports a DSL for declarative proof scripts <<<<-- hot!|||t>>>
 ;;; - it leverages the Clojure (JVM/Maven) ecosystem for <<<proving in the large|||t>>>
 
 
 
-;;; # Our first theorems ...
+;;; # Our first LaTTe theorems ...
 
 (defthm and-elim-right
   "Right elimination for conjunction."
@@ -379,13 +389,18 @@
 
 ;;; # Let's do some real maths...
 
-;;; Our objective is to encode in LaTTe the <<<Peano arithmetics|||t>>>
-;;; for natural numbers, and demontrate an important inductive property
+;;; ### Our objective (in the few minutes to come):
+
+;;; 1) live-code in LaTTe the <<<Peano arithmetics|||t>>>
+;;; for natural numbers, and
+
+;;; 2) demontrate an important inductive property
 ;;; about them...
 
 
 
-;;; # The Peano arithmetics in (a bunch of) blinks of an eye
+;;; # The Peano arithmetics
+;;; ### in (a bunch of) blinks of an eye
 
 (defaxiom nat
   "The first Peano primive: ℕ is a primitive set"
@@ -487,25 +502,38 @@ another integer"
                         base
                         induct))))
     
-    
-
 
 
 ;;; # Yes, we could!
 ;;; (I hope you enjoyed the ride...)
 
 ;;; ### Mathematics can be fun, (almost) as fun as live-coding in Clojure!
-;; but ... wait.. this *is* live-coding in Clojure!
+;; but ... wait! this *is* live-coding in Clojure!
 
-;;; Formalizing and proving things is a very addictive <<<puzzle game|||(lambda (x) t)>>>
-;;; - with both a *single player mode* and *multiplayer cooperation* available!
+;;; Formalizing and proving things can be a very addictive <<<puzzle game|||(lambda (x) t)>>>
+;;; - with both a <<<single player mode|||(lambda (x) t)>>> and <<<multiplayer cooperation|||(lambda (x) t)>>> available!
 ;; (MMO being considered)
-;;; - simple puzzles for starters: propositional logic, basic quantifiers, etc.
-;;; - and more challenging things: inductive types, numbers, etc.
+
+;;; - An un limited number of puzzles awaits you:
+
+;;;    * starters: propositional logic, basic quantifiers, etc.
+
+;;;    * serious challenges: numbers, inductive types, recursive functions, etc.
 ;;    (way better than Sudoku and even kakuro)
-;;; - also very difficult things: current mathematics
-;;; - and what about <<<P =/≠ NP|||(lambda (x) t)>>>?
-;;    (if you enjoy real challenges!)
+
+;;;    * professional-grade puzzles: modern mathematics
+
+
+
+;;; # ... and what about a real challenge?
+
+(defthm life-universe-rest
+  "" [[Algos :type] [P Algos] [NP Algos]]
+  (not (equal Algos P NP))) ;; or is-it?
+
+(proof life-universe-rest
+    :script
+  "TODO")
 
 ;;; ### Let's play together at: https://github.com/fredokun/LaTTe
 ;;; you're just a `lein new my-cool-maths` away...
