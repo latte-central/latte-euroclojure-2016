@@ -134,3 +134,6 @@
  ("C-c \"" . wrap-with-double-quotes)
  ("C-c _"  . wrap-with-underscores)
  ("C-c `"  . wrap-with-back-quotes))
+
+;; show the time
+(display-time-mode 1)

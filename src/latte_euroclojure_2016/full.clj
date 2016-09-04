@@ -56,12 +56,12 @@
              :refer [definition defthm defaxiom defnotation
                      forall lambda ==>
                      assume have proof try-proof
-                     term type-of check-type?]])
+                     term type-of check-type?]]
 
   ;; ... the "standard" library (propositions, quantifiers and equality) 
-  (:require [latte.prop :as p :refer [<=> and or not]])
-  (:require [latte.quant :as q :refer [exists]])
-  (:require [latte.equal :as eq :refer [equal]]))
+            [latte.prop :as p :refer [<=> and or not]]
+            [latte.quant :as q :refer [exists]]
+            [latte.equal :as eq :refer [equal]]))
 
 
 
