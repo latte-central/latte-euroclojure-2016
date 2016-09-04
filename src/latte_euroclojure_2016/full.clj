@@ -205,7 +205,7 @@
 ;;; (==> A A)
 ;; "A implies A"  (reflexivity of implication)
 
-;;; ### - the type of the composition function on A,B and C is:
+;;; ###- the type of the composition function on A,B and C is:
 
 ;;; (==> (==> A B) (==> B C)
 ;;;      (==> A C))
@@ -445,38 +445,38 @@
 
 ;;; # A proof by induction
 
+(definition nat-split
+  "The split of natural numbers."
+  [[n nat]]
+  (or (equal nat n zero)
+      (exists [m nat]
+              (equal nat n (succ m)))))
+  
 (defthm nat-strong
   "A natural integer is either zero or the successor of
 another integer"
   []
   (forall [n nat]
-    (or (equal nat n zero)
-        (exists [m nat]
-          (equal nat n (succ m))))))
-
+    (nat-split n)))
+    
 (proof nat-strong
     :script
-  "We first define the predicate P(n) corresponding to nat-strong."
-  (have P _ :by (lambda [n nat]
-                  (or (equal nat n zero)
-                      (exists [m nat]
-                        (equal nat n (succ m))))))
-  "We now prove P(n) by induction on n."
-  "1) base case P(0)"
+  "We do the proof by induction on n (in fact by case-analysis)."
+  "1) base case n=0"
   "0 = 0  by reflexivity"
   (have base1 (equal nat zero zero)
         :by (eq/eq-refl nat zero))
-  "hence P(0) holds."
-  (have base (P zero)
+  "hence the base case."
+  (have base (nat-split zero)
         :by ((p/or-intro-left
               (equal nat zero zero)
               (exists [m nat]
                 (equal nat zero (succ m)))) base1))
   "2) inductive case"
-  "We suppose that P(k) holds for an arbitrary k."
+  "We suppose that the property for an arbitrary k."
   (assume [k nat
-           Hind (P k)]
-    "We then have to show that P(k+1) holds."
+           Hind (nat-split k)]
+    "We then have to show that it holds for k+1."
     "Let the predicate Q(m) such that k+1=m+1"
     (have Q _ :by (lambda [m nat]
                     (equal nat (succ k) (succ m))))
@@ -488,17 +488,17 @@ another integer"
                     (equal nat (succ k) (succ m)))
           :by ((q/ex-intro nat Q k) induct1))
     "from this we get that P(k+1) is true."
-    (have induct3 (P (succ k))
+    (have induct3 (nat-split (succ k))
           :by ((p/or-intro-right (equal nat (succ k) zero)
                                  (exists [m nat]
                                    (equal nat (succ k) (succ m)))) induct2))
-    "hence forall k, P(k) ==> P(k+1) as planned."
+    "hence we can deduce the case for k+1 from the case of k."
     (have induct (forall [k nat]
-                   (==> (P k) (P (succ k))))
+                   (==> (nat-split k) (nat-split (succ k))))
           :discharge [k Hind induct3]))
   "we can conclude by applying the induction axiom."
   (have concl _
-        :by ((nat-induct P) (p/%and-intro base induct)))
+        :by ((nat-induct nat-split) (p/%and-intro base induct)))
   (qed concl))
     
 
