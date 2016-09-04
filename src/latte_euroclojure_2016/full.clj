@@ -497,10 +497,9 @@ another integer"
                    (==> (P k) (P (succ k))))
           :discharge [k Hind induct3]))
   "we can conclude by applying the induction axiom."
-  (qed ((nat-induct P) ((p/and-intro (P zero)
-                                     (forall [k nat] (==> (P k) (P (succ k)))))
-                        base
-                        induct))))
+  (have concl _
+        :by ((nat-induct P) (p/%and-intro base induct)))
+  (qed concl))
     
 
 
