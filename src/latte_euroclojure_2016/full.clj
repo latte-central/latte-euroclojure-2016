@@ -29,15 +29,22 @@
 ;;; The theory underlying LaTTe (as well as its basic library)
 ;;; is heavily influenced by the following book:
 
-
 ;;; ## Type Theory and Formal Proof: an Introduction
 ;;; ### Rob Nederpelt and Herman Geuvers
 ;; Cambridge University Press, 2012
 
+;;;               __...--~~~~~-._   _.-~~~~~--...__
+;;;             //               `V'               \\ 
+;;;            //                 |                 \\ 
+;;;           //__...--~~~~~~-._  |  _.-~~~~~~--...__\\ 
+;;;          //__.....----~~~~._\ | /_.~~~~----.....__\\
+;;;         ====================\\|//====================
+;;;                         dwb `---`  
+
 ;;; It is a wonderful book for (the few ?) people interested
 ;;; in such topics
 
-;; (but of course, you do *not* need to read the book to
+;; (of course, you do *not* need to read the book to
 ;; use LaTTe, or hopefully to understand this talk!).
 
 
@@ -62,6 +69,14 @@
             [latte.prop :as p :refer [<=> and or not]]
             [latte.quant :as q :refer [exists]]
             [latte.equal :as eq :refer [equal]]))
+
+
+;; (defmacro proof
+;;   "A variant of the proof macro for EuroClojure"
+;;   [thm method & args]
+;;   `(try (latte/proof ~thm ~method ~@args)
+;;         (catch Exception err#
+;;           [:ko (:msg (ex-data err#))])))
 
 
 

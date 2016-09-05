@@ -76,6 +76,7 @@
 (global-set-key (kbd "C-+") 'text-scale-increase)
 
 (global-set-key (kbd "C-œ") 'live-clojure-talks-mode)
+(global-set-key (kbd "C-&") 'smartparens-strict-mode)
 
 (use-package smartparens-config
     :ensure smartparens
