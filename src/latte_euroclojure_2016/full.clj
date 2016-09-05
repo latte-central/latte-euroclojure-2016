@@ -2,7 +2,7 @@
 ;;; # Live-coding Mathematics
 ;;; ## Your first Clojure proofs
 
-;;    using the LaTTe proof assistant: <<<https://github.com/fredokun/LaTTe|||(lambda (x) (browse-url "https://github.com/fredokun/LaTTe"))>>>
+;;  using the LaTTe proof assistant: <<<https://github.com/fredokun/LaTTe|||(lambda (x) (browse-url "https://github.com/fredokun/LaTTe"))>>>
 
          ;;;                  ((((
          ;;;                 ((((
@@ -69,14 +69,6 @@
             [latte.prop :as p :refer [<=> and or not]]
             [latte.quant :as q :refer [exists]]
             [latte.equal :as eq :refer [equal]]))
-
-
-;; (defmacro proof
-;;   "A variant of the proof macro for EuroClojure"
-;;   [thm method & args]
-;;   `(try (latte/proof ~thm ~method ~@args)
-;;         (catch Exception err#
-;;           [:ko (:msg (ex-data err#))])))
 
 
 
@@ -170,6 +162,8 @@
 (term (lambda [A :type]
         (lambda [x A] x)))
 
+;; ^^^ look ma! a System F-ish term depending on a type! ^^^
+
 ;; e.g.:  (((lambda [A :type] (lambda [x A] x)) 42) int)
 ;;        --> ((lambda [x int] x) 42)
 ;;        --> 42
@@ -217,13 +211,15 @@
 
 ;;; ### - the type of the identity function on A is:
 
-;;; (==> A A)
+;;; (forall [A :type]
+;;;   (==> A A))
 ;; "A implies A"  (reflexivity of implication)
 
 ;;; ###- the type of the composition function on A,B and C is:
 
-;;; (==> (==> A B) (==> B C)
-;;;      (==> A C))
+;;; (forall [A B C :type]
+;;;   (==> (==> A B) (==> B C)
+;;;        (==> A C)))
 ;; if "A implies B" and "B implies C" then "A implies C"
 ;; (transitivity of implication)
 
@@ -303,8 +299,30 @@
    (==> (==> A B) A
         B))
 
-
 ;; Modus ponens is beta-reduction (function application) it is that simple!
+
+
+
+;;; # Universal quantifier
+
+;;; In type theory, the modus ponens naturally generalizes
+;;; to instantiation of universal quantifiers.
+
+(check-type?
+ [Thing :type] [man (==> Thing :type)] [mortal (==> Thing :type)]
+ [socrate Thing]
+
+ (lambda [H1 (forall [t Thing] (==> (man t) (mortal t)))]
+   (lambda [H2 (man socrate)]
+     ((H1 socrate) H2)))
+ 
+ ;; Was Aristotle right?
+ 
+ (==> (forall [t Thing]
+        (==> (man t) (mortal t)))
+      (man socrate)
+      ;; thus
+      (mortal socrate)))
 
 
 
@@ -395,10 +413,16 @@
        B))
 
 (proof dummy-theorem
-    :term
-  (lambda [H1 (==> A B)]
-    (lambda [H2 (and C A)]
-      (H1 ((and-elim-right C A) H2)))))
+    :script
+  (assume [H1 (==> A B)
+           H2 (and C A)]
+    (have a A :by ((and-elim-right C A) H2))
+    (have b B :by (H1 a))
+    (qed b)))
+;;    :term
+;;  (lambda [H1 (==> A B)]
+;;    (lambda [H2 (and C A)]
+;;      (H1 ((and-elim-right C A) H2)))))
 
 
 
@@ -549,9 +573,11 @@ another integer"
     :script
   "TODO")
 
+;;;
 ;;; ### Let's play together at: https://github.com/fredokun/LaTTe
 ;;; you're just a `lein new my-cool-maths` away...
 ;; (no? really? how unfortunate :~( )
 
 
 ;;; # Thank you!
+
