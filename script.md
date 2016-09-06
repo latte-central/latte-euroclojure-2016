@@ -7,7 +7,7 @@ at the university Pierre et Marie Curie in Paris, France,
  Mathematics session! (yeah!)
  
 We will be using the LaTTe proof assistant, which is in
-a Clojure library that you can get on clojars. You're only
+a Clojure library that you can get from clojars. You're only
  that far from your first Clojure proofs!
 
 # Slide 2
