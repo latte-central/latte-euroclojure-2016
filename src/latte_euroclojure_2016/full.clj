@@ -472,9 +472,9 @@
 (defaxiom nat-induct
   "The third Peano axiom: induction principle on ℕ"
   [[P (==> nat :type)]]
-  (==> (and (P zero)
-            (forall [k nat]
-              (==> (P k) (P (succ k)))))
+  (==> (P zero)
+       (forall [k nat]
+         (==> (P k) (P (succ k))))
        (forall [n nat] (P n))))
 
 
@@ -484,12 +484,33 @@
 
 ;;; # A proof by induction
 
+(defthm nat-case
+  "Proof by case analysis."
+  [[P (==> nat :type)]]
+  (==> (P zero)
+       (forall [k nat] (P (succ k)))
+       (forall [n nat] (P n))))
+
+(proof nat-case
+    :script
+  (assume [Hz (P zero)
+           HS (forall [k nat] (P (succ k)))]
+    (assume [k nat
+             Hind (P k)]
+      (have a (P (succ k)) :by (HS k))
+      (have b (forall [k nat]
+                (==> (P k) (P (succ k))))
+            :discharge [k Hind a]))
+    (have c (forall [n nat] (P n))
+          :by ((nat-induct P) Hz b))
+    (qed c)))
+
 (definition nat-split
   "The split of natural numbers."
   [[n nat]]
   (or (equal nat n zero)
       (exists [m nat]
-              (equal nat n (succ m)))))
+        (equal nat n (succ m)))))
   
 (defthm nat-strong
   "A natural integer is either zero or the successor of
@@ -500,44 +521,40 @@ another integer"
     
 (proof nat-strong
     :script
-  "We do the proof by induction on n (in fact by case-analysis)."
-  "1) base case n=0"
+  "We do the proof by case analysis on n."
+  "1) case n=0"
   "0 = 0  by reflexivity"
-  (have base1 (equal nat zero zero)
+  (have a1 (equal nat zero zero)
         :by (eq/eq-refl nat zero))
   "hence the base case."
-  (have base (nat-split zero)
+  (have a (nat-split zero)
         :by ((p/or-intro-left
               (equal nat zero zero)
               (exists [m nat]
-                (equal nat zero (succ m)))) base1))
-  "2) inductive case"
-  "We suppose that the property for an arbitrary k."
-  (assume [k nat
-           Hind (nat-split k)]
-    "We then have to show that it holds for k+1."
+                (equal nat zero (succ m)))) a1))
+  "2) case n=k+1 for an arbitrary k"
+  (assume [k nat]
     "Let the predicate Q(m) such that k+1=m+1"
-    (have Q _ :by (lambda [m nat]
-                    (equal nat (succ k) (succ m))))
+    (have Q _ :by (lambda [m nat] (equal nat (succ k) (succ m))))
     "Since  k+1 = k+1 by reflexivity we know that Q(k) is true."
-    (have induct1 (Q k)
+    (have b1 (Q k)
           :by (eq/eq-refl nat (succ k)))
     "hence there exists an m such that k+1=m+1 (namely k)"
-    (have induct2 (exists [m nat]
+    (have b2 (exists [m nat]
                     (equal nat (succ k) (succ m)))
-          :by ((q/ex-intro nat Q k) induct1))
+          :by ((q/ex-intro nat Q k) b1))
     "from this we get that P(k+1) is true."
-    (have induct3 (nat-split (succ k))
+    (have b3 (nat-split (succ k))
           :by ((p/or-intro-right (equal nat (succ k) zero)
                                  (exists [m nat]
-                                   (equal nat (succ k) (succ m)))) induct2))
+                                   (equal nat (succ k) (succ m)))) b2))
     "hence we can deduce the case for k+1 from the case of k."
-    (have induct (forall [k nat]
-                   (==> (nat-split k) (nat-split (succ k))))
-          :discharge [k Hind induct3]))
-  "we can conclude by applying the induction axiom."
+    (have b (forall [k nat]
+              (nat-split (succ k)))
+          :discharge [k b3]))
+  "we can conclude by applying the case analysis theorem."
   (have concl _
-        :by ((nat-induct nat-split) (p/%and-intro base induct)))
+        :by ((nat-case nat-split) a ))
   (qed concl))
     
 
