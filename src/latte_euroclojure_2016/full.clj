@@ -170,7 +170,7 @@
 
 
 
-;;; # Let's type-check ...
+;;; # Let's do some type-checking ...
 
 ;;; ##What is the type of the (type-generic) identity?
 
