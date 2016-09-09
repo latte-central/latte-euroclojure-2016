@@ -140,3 +140,17 @@
 
 ;; show the time
 (display-time-mode 1)
+
+(defun my-minibuffer-setup ()
+       (set (make-local-variable 'face-remapping-alist)
+          '((default :height 2.0))))
+(add-hook 'minibuffer-setup-hook 'my-minibuffer-setup)
+
+(set-face-attribute 'default nil :height 200)
+(set-face-attribute 'mode-line nil :height 100)
+(set-face-attribute 'window-divider nil :height 100)
+(set-face-attribute 'minibuffer-prompt nil :height 100)
+(set-face-attribute 'header-line nil :height 100)
+(set-face-attribute 'menu nil :height 100)
+(set-face-attribute 'button nil :height 100)
+

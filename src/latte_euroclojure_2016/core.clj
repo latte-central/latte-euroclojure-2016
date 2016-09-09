@@ -72,10 +72,6 @@
 
 ;;; ### A trivial example: the identity function
 
-(fn [x] x)
-
-;; ... that you can apply to some value:
-
 ((fn [x] x) 42)
 
 ;;; ### Another example: binary composition
@@ -166,7 +162,10 @@
 
  ;; is of type ...
 
- ✳)
+ (forall [A :type]
+   (==> A A)))
+
+
  
 
 
@@ -184,7 +183,11 @@
 
  ;; is of type ...
 
- ✳)
+ (forall [A B C :type]
+   (==> (==> A B)
+        (==> B C)
+        (==> A C))))
+
 
 
 
@@ -200,7 +203,8 @@
 ;;; ###- the type of the composition function on A,B and C is:
 
 ;;; (forall [A B C :type]
-;;;   (==> (==> A B) (==> B C)
+;;;   (==> (==> A B)
+;;;        (==> B C)
 ;;;        (==> A C)))
 
 

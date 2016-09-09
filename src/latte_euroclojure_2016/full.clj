@@ -25,7 +25,6 @@
 
 ;;; # To give credit where credit is due ...
 
-
 ;;; The theory underlying LaTTe (as well as its basic library)
 ;;; is heavily influenced by the following book:
 
@@ -78,10 +77,6 @@
 ;;; ... we use it to construct first-class anonymous functions ...
 
 ;;; ### A trivial example: the identity function
-
-(fn [x] x)
-
-;; ... that you can apply to some value:
 
 ((fn [x] x) 42)
 
@@ -218,7 +213,8 @@
 ;;; ###- the type of the composition function on A,B and C is:
 
 ;;; (forall [A B C :type]
-;;;   (==> (==> A B) (==> B C)
+;;;   (==> (==> A B)
+;;;        (==> B C)
 ;;;        (==> A C)))
 ;; if "A implies B" and "B implies C" then "A implies C"
 ;; (transitivity of implication)

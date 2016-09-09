@@ -2,39 +2,61 @@
 # Slide 1
 
 Hello, my name is Frederic Peschanski. I am a professor
-at the university Pierre et Marie Curie in Paris, France,
- and I am very happy to be here with you for a live-coding
- Mathematics session! (yeah!)
- 
-We will be using the LaTTe proof assistant, which is in
-a Clojure library that you can get from clojars. You're only
- that far from your first Clojure proofs!
+at the university Pierre et Marie Curie in Paris in France.
+
+I am very thankfull for the Clojure technology and community,
+ to have taken very seriously the notion of *live-coding*!
+It seems to me, from the eyes of an academic, that live-coding greatly help
+people developing software in the *real* world while still having fun!
+
+... Live-coding is fun, there's no doubt about that. There
+are examples of live-coding musics and graphics, especially
+ in Clojure, that are really mind blowing!
+
+Many people hate mathematics... I wonder if it is because it's
+boring in essence or if it's more about the way we do mathematics?
+In this talk, we will use a small library called LaTTe for
+ a session of live-coding logic and mathematics in Clojure.
+... we'll see if it's fun or not...
+
+Timing: 2:30 (total 2:30)
 
 # Slide 2
 
-... but first let me give credit where credit is due.
-Most of what I will tell you comes from a very fine book:
- Type theory and formal proofs by Rob Nederpeldt and Herman
- Geuvers. I highly recommend this book if you are interested
- in the logic and its relation with the lambda-calculus.
- 
-# Slide 3 
+... just before we begin, I would like to say that I started
+all this after reading a book that I find very interesting.
 
-Ok, so let's get started ... 
+ Type theory and formal proofs by Rob Nederpeldt and Herman
+ Geuvers.
+
+Of course, you do not need to read this book to understand my talk
+ or even to use LaTTe. But it is still a very interesting reading if
+ you want to know more about the lambda-calculus and its deep connection
+  with not just computation but also logic and mathematics.
+
+Timing: 1:00 (total 3:30)
+
+# Slide 3
+
+Ok, so let's get started ... For this presentation, I will simply
+use emacs and cider.
+
+Timing 0:30 (total 4:00)
 
 # Slide 4
 
-The pure lambda-calculus is a language of first-class higher order
-functions. In Clojure, this corresponds to only work with variables,
- anonymous functions built with `fn` and function application.
+There is in fact only one prerequisite for this talk: I need you to
+know about the pure lambda-calclus. But of course I am not taking
+any risk here since the pure lambda calculus is already *in* Clojure. 
+If you take only the `fn` form with only 1 argument, variables and
+ function application (plus some constants), then you *get* the pure lambda-calculus.
 
-Let's take the example of probably the simplest useful function of all: identity.
-If you apply this function to a value then you of course get the exact same value.
-
-As a slightly more involved example: we consider the composition of two functions, a
- simpler variant of `comp`.
+Here is a typical example: the identity function.
+As another example you can compose functions such as with `comp`.
 Here, we compose a function that takes an integer and returns a boolean, that
 we compose with a function taking a boolean and returing a string.
+
+Timing: 2:00 (total 6:00)
 
 # Slide 5
 
@@ -55,17 +77,21 @@ thing is that it works!
 We could go a long way with such encodings, but what I want to do now
 is to switch to a lambda-calculus suitable for doing mathematics.
 
+Timing: 2:00 (total 8:00)
+
 # Slide 6
 
-And this is exacly what is implemented by the kernel of the LaTTe proof assistant:
- a lambda-calculus. However, I have to warn you that it is a lambda calculus
- with explicit and very high-level types. It is what logicians call a type theory.
- 
-I know that types can be controversal in programming, and it is in fact
+The kernel of the LaTTe library is also a lambda-calculus. The difference with
+pure lambda is that it is explicitly typed. It is in fact what logicians call
+ a *type theory*.
+
+ I know that types can be controversal in programming, and it is in fact
 also the case in logic and mathematics. But let's say that you need types
-to do mathematics with the lambda-calculus, I guess even logicians agree
+to do mathematics with the lambda-calculus, and I guess even logicians agree
 with this statement.
- 
+
+Timing: 1:00 (9:00)
+
 # Slide 7
 
 So in LaTTe you have a lambda-calculus with explicit types.
@@ -81,21 +107,27 @@ Although LaTTe is not a programming language, you would use such a
 function by first supplying a type, and then a value of that type.
 We have here a nice example of a term depending on a type, a feature
  of System F, also called the polymorphic lambda-calculus.
- 
+
+Timing: 1:00 (10:00)
+
 # Slide 8
 
-One question, then, is what would be the type of the identity function.
+A question, then, is what is the type of the identity function.
 Without boring you with details, the type of a lambda is a forall.
 In this case we obtain this... <code>
 
 An important remark here is that in the the variable
  x introduced by the second forall is not used in its body. In this
-  case there is a nice shortcut <code>.
+  case there is a nice syntactic shortcut <code>.
 
-The identity function is a function from type A to type A, for any
+Thus, the identity function is a function from type A to type A, for any
  type A you might consider.
 
-The arrow type is thus simply a special case of a forall!
+The take away here is that:
+
+> The arrow type of functional programming is simply a special case of a universal quantification!
+
+Timing: 1:30 (11:30)
 
 # Slide 9
 
@@ -104,12 +136,15 @@ and we obtain the following type... Don't bother trying
 to understand this, just witness the fact that the type checker
  of LaTTe agrees.
 
+Timing: 1:30 (13:00)
+
 # Slide 10
 
-Maybe you saw it but let me consider these examples from the point
-of view of a logician.
+Maybe you saw it but something interesting happened.
+I was talking about types but when reading the types what
+we see are more like logical propositions.
 
-The type of the identity function is 
+For example, the type of the identity function is 
 strangely similar to a well-known logical truth: that for any
 proposition `A` we have `A` implies `A`. This is the reflexivity
  of implication.
@@ -121,7 +156,9 @@ This is transitivity of implication.
 Here, we considered types to be logical propositions. And this
 is in fact one important facet of the famous Curry-Howard correspondence:
  the proposition-as-type interpretation of the typed lambda-calculus.
- 
+
+ Timing: 1:30 (14:30)
+
 # Slide 11
 
 The pairing function has also a very interesting interpretation.
