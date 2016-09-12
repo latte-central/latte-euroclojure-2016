@@ -225,7 +225,9 @@
 
    ;; of type...
 
-   ✳)
+   (forall [x A]
+     (forall [y B]
+       (and A B))))
 
 
 
@@ -239,7 +241,8 @@
    (lambda [p (and A B)]
      ((p A) (lambda [x A] (lambda [y B] x))))
    ;; of type
-   ✳)
+   (==> (and A B)
+        A))
 
 ;; --> this is <<<latte.prop/and-elim-left|||t>>>
 
@@ -247,7 +250,8 @@
    (lambda [p (and A B)]
      ((p B) (lambda [x A] (lambda [y B] y))))
    ;; of type
-   ✳)
+   (==> (and A B)
+        B))
 
 ;; --> this is <<<latte.prop/and-elim-right|||t>>>
 
@@ -266,7 +270,9 @@
 (check-type? [A :type] [B :type]
 
    ;; find a term ...
-   ✳
+   (lambda [f (==> A B)]
+     (lambda [x A]
+       (f x)))
 
    ;; of type
    
@@ -284,7 +290,10 @@
  [Thing :type] [man (==> Thing :type)] [mortal (==> Thing :type)]
  [socrate Thing]
 
- ✳
+ (lambda [H1 (forall [t Thing]
+               (==> (man t) (mortal t)))]
+   (lambda [H2 (man socrate)]
+     ((H1 socrate) H2)))
  
  ;; ^^^ Was Aristotle right? ^^^
  
@@ -302,9 +311,12 @@
 ;;; Let's try to prove something about
 ;;; the implication and conjunction
 
-(check-type? [A :type] [B :type] [C :type]
-             
-  ✳
+(check-type?
+ [A :type] [B :type] [C :type]
+ 
+ (lambda [H1 (==> A B)]
+   (lambda [H2 (and C A)]
+     (H1 ((H2 A) (lambda [x C] (lambda [y A] y))))))
              
   ;; ^^^ the proof term ^^^
   
@@ -317,7 +329,8 @@
 
 ;;; ## What we learned thus far ...
 
-;;; ... that a lambda-calculus with types may be used to:
+;;; ... that thanks to the Curry-Howard correspondence
+;;; a lambda-calculus with types may be used to:
 
 ;;;   1) express logical propositions as types
 
@@ -339,21 +352,20 @@
 ;;; a tool that allows to describe mathematical content on
 ;;; a computer, and assists in the mathematician's routine: proving things!
 
+
 ;;; ## About LaTTe
-;;; unlike most assistants, LaTTe is not a standalone application
-;;; but a Clojure library (available on Clojars!).
-;;; ### ⟹ any Clojure Dev. Env. can be used to do maths!
-;;; (e.g. I use both Cider and Gorilla Repl, sometimes together via nrepl...)
+;;; LaTTe is a proof assistant implemented as a Clojure library
+;;; with top-level forms for axioms, definitions, theorems and proofs.
+;; available on Clojars: <<<[latte "0.3.2-SNAPSHOT"]|||(lambda (x) t)>>>
 
-;;; ## Main features
+;;; ## Notable features
 
-;;; - the kernel is a lambda-calculus with dependent types
-;;   (sometimes called λD or the calculus of constructions)
-;;; - top-level Clojure forms are provided for definitions, axioms, declaration
-;;;   of theorems and encoding of proofs
-;; (plus notations, specials, etc.)
-;;; - it supports a DSL for declarative proof scripts <<<<-- hot!|||t>>>
+;;; - any Clojure Development environment can be used to do maths!
+;; (e.g. I use both Cider and Gorilla Repl, sometimes together via nrepl...)
+
 ;;; - it leverages the Clojure (JVM/Maven) ecosystem for <<<proving in the large|||t>>>
+
+;;; - it supports a DSL for declarative proof scripts <<<<-- hot!|||t>>>
 
 
 
@@ -366,6 +378,10 @@
        B))
 
 ;; ?
+(proof and-elim-right
+    :term
+  (lambda [H (and A B)]
+    ((H B) (lambda [x A] (lambda [y B] y)))))
 
 (defthm dummy-theorem
   "This is an example theorem"
@@ -374,10 +390,17 @@
        B))
 
 (proof dummy-theorem
-    :term
-  (lambda [H1 (==> A B)]
-    (lambda [H2 (and C A)]
-      (H1 ((and-elim-right C A) H2)))))
+    :script
+
+  (assume [H1 (==> A B)
+           H2 (and C A)]
+    (have <step1> (==> (and C A) A)
+          :by (and-elim-right C A))
+    (have <step2> A
+          :by (<step1> H2))
+    (have <step3> B
+          :by (H1 <step2>))
+    (qed <step3>)))
 
 
 
@@ -396,17 +419,39 @@
 ;;; # The Peano arithmetics
 ;;; ### in (a bunch of) blinks of an eye
 
-"The first Peano primive: ℕ is a primitive set"
+(defaxiom nat
+  "The first Peano primive: ℕ is a primitive set"
+  []
+  :type)
 
-"The second Peano primitive: 0 is in ℕ"
+(defaxiom zero
+  "The second Peano primitive: 0 is in ℕ"
+  []
+  nat)
 
-"The third Peano primitive: the successor function of type ℕ ⟶ ℕ"
+(defaxiom succ
+  "The third Peano primitive: the successor function of type ℕ ⟶ ℕ"
+  []
+  (==> nat nat))
 
-"The first Peano axiom: there is no successor in ℕ that equals 0"
+(defaxiom nat-zero
+  "The first Peano axiom: there is no successor in ℕ that equals 0"
+  []
+  (forall [n nat] (not (equal nat (succ n) zero))))
 
-"The second Peano axiom: the successor function is injective"
+(defaxiom succ-injective
+  "The second Peano axiom: the successor function is injective"
+  []
+  (forall [n m nat]
+    (==> (equal nat (succ n) (succ m))
+         (equal nat n m))))
 
-"The third Peano axiom: induction principle on ℕ"
+(defaxiom nat-induct
+  "The third Peano axiom: induction principle on ℕ"
+  [[P (==> nat :type)]]
+  (==> (P zero)
+       (forall [k nat] (==> (P k) (P (succ k))))
+       (forall [n nat] (P n))))
                
 
 
@@ -421,8 +466,11 @@
 
 (proof nat-case
     :script
-  ;; TODO
-  )
+  (assume [H1 (P zero)
+           H2 (forall [k nat] (P (succ k)))]
+    "proof by induction on n"
+    "first case: n=0"
+    (have <base1> (P zero))))
 
 (definition nat-split
   "The split of natural numbers."

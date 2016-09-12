@@ -92,28 +92,6 @@
 
 
 
-;;; # Lambda the ultimate
-
-;;; ## Church thesis
-;;; All computable functions can be encoded in the pure lambda-calculus
-;;(only with single argument <<<fn|||t>>>'s, function application and variables)
-
-;;; ### Example: the pairing function
-
-(def pair (fn [x] (fn [y] (fn [z] ((z x) y)))))
-
-;;; and accessors (or eliminators as you'll see)
-
-(def fst (fn [p] (p (fn [x] (fn [y] x)))))
-(def snd (fn [p] (p (fn [x] (fn [y] y)))))
-
-;;; e.g.:
-
-(fst ((pair "hello") 42))
-(snd ((pair "hello") 42))
-
-
-
 ;;; # LaTTe (kernel) = Lambda with explicit types
 ;;; ## (a.k.a. a Type Theory)
 ;;;                _..._
@@ -224,56 +202,6 @@
 
 
 
-;;; # The type-generic pairing function
-
-;; reminder
-(def pair (fn [x] (fn [y] (fn [z] ((z x) y)))))
-
-;; a type-generic version
-(check-type? [A :type] [B :type] ;; <-- this is called the 'context'
-   (lambda [x A]
-     (lambda [y B]
-       (lambda [C :type]
-         (lambda [z (==> A B C)]
-           ((z x) y)))))
-   ;; of type...
-
-   (==> A B
-        (and A B)))
-
-;; or  (==> A B
-;;       (forall [C :type]
-;;          (==> (==> A B C)
-;;               C)))
-
-
-
-;;; # Accessors = elimination rules
-
-;; reminders
-(def fst (fn [p] (p (fn [x] (fn [y] x)))))
-(def snd (fn [p] (p (fn [x] (fn [y] y)))))
-
-(check-type? [A :type] [B :type]
-   (lambda [p (and A B)]
-     ((p A) (lambda [x A] (lambda [y B] x))))
-   ;; of type
-   (==> (and A B)
-        A))
-
-;; --> this is <<<latte.prop/and-elim-left|||t>>>
-
-(check-type? [A :type] [B :type] ;; <-- this is called 'the context'
-   (lambda [p (and A B)]
-     ((p B) (lambda [x A] (lambda [y B] y))))
-   ;; of type
-   (==> (and A B)
-        B))
-
-;; --> this is <<<latte.prop/and-elim-right|||t>>>
-
-
-
 ;;; # Deduction ...
 
 ;;; Logical (and thus mathematical) reasoning heavily relies on
@@ -320,35 +248,14 @@
       ;; thus
       (mortal socrate)))
 
-
-
-
-;;; # Our first (low-level) proof ...
-
-;;; Let's try to prove something about
-;;; the implication and conjunction
-
-(check-type? [A :type] [B :type] [C :type]
-             
-  (lambda [H1 (==> A B)]
-    (lambda [H2 (and C A)]
-      (H1 ((H2 A) (lambda [x C] (lambda [y A] y))))))
-
-  ;; ^^^ the proof term ^^^
-  
-  (==> (==> A B) (and C A)
-       B))
-
-;; This is the <<<Proof-as-Term|||t>>> part
-;;     of the <<<Curry-Howard correspondance|||t>>> 
-
 
 
 ;;; # Entracte ...
 
 ;;; ## What we learned thus far ...
 
-;;; ... that a lambda-calculus with types may be used to:
+;;; ... that thanks to the Curry-Howard correspondence
+;;; a lambda-calculus with types may be used to:
 
 ;;;   1) express logical propositions as types
 
@@ -370,55 +277,20 @@
 ;;; a tool that allows to describe mathematical content on
 ;;; a computer, and assists in the mathematician's routine: proving things!
 
+
 ;;; ## About LaTTe
-;;; unlike most assistants, LaTTe is not a standalone application
-;;; but a Clojure library (available on Clojars!).
-;;; ### ⟹ any Clojure Dev. Env. can be used to do maths!
-;;; (e.g. I use both Cider and Gorilla Repl, sometimes together via nrepl...)
+;;; LaTTe is a proof assistant implemented as a Clojure library
+;;; with top-level forms for axioms, definitions, theorems and proofs.
+;; available on Clojars: <<<[latte "0.3.2-SNAPSHOT"]|||(lambda (x) t)>>>
 
-;;; ## Main features
+;;; ## Notable features
 
-;;; - the kernel is a lambda-calculus with dependent types
-;;   (sometimes called λD or the calculus of constructions)
-;;; - top-level Clojure forms are provided for definitions, axioms, declaration
-;;;   of theorems and encoding of proofs
-;; (plus notations, specials, etc.)
-;;; - it supports a DSL for declarative proof scripts <<<<-- hot!|||t>>>
+;;; - any Clojure Development environment can be used to do maths!
+;; (e.g. I use both Cider and Gorilla Repl, sometimes together via nrepl...)
+
 ;;; - it leverages the Clojure (JVM/Maven) ecosystem for <<<proving in the large|||t>>>
 
-
-
-;;; # Our first LaTTe theorems ...
-
-(defthm and-elim-right
-  "Right elimination for conjunction."
-  [[A :type] [B :type]]
-  (==> (and A B)
-       B))
-
-;; Warning: proof required !
-(proof and-elim-right
-    :term
-  (lambda [H (and A B)]
-    ((H B) (lambda [x A] (lambda [y B] y)))))
-
-(defthm dummy-theorem
-  "This is an example theorem"
-  [[A :type] [B :type] [C :type]]
-  (==> (==> A B) (and C A)
-       B))
-
-(proof dummy-theorem
-    :script
-  (assume [H1 (==> A B)
-           H2 (and C A)]
-    (have a A :by ((and-elim-right C A) H2))
-    (have b B :by (H1 a))
-    (qed b)))
-;;    :term
-;;  (lambda [H1 (==> A B)]
-;;    (lambda [H2 (and C A)]
-;;      (H1 ((and-elim-right C A) H2)))))
+;;; - it supports a DSL for declarative proof scripts <<<<-- hot!|||t>>>
 
 
 
@@ -488,15 +360,22 @@
        (forall [n nat] (P n))))
 
 (proof nat-case
-    :script
+  :script
+  "First we state our assumptions."     
   (assume [Hz (P zero)
            HS (forall [k nat] (P (succ k)))]
+          "Now we proceed by induction on n."
+          "base case (n=0): trivial since (P zero) by Hz"
+          "inductive case. Suppose (P k) for some natural number k"
     (assume [k nat
              Hind (P k)]
-      (have a (P (succ k)) :by (HS k))
+            "Let's prove that (P (succ k))"
+            (have a (P (succ k)) :by (HS k))
+            "Hence for any k (==> (P k) (P succ k))"
       (have b (forall [k nat]
                 (==> (P k) (P (succ k))))
             :discharge [k Hind a]))
+    "Thus (P n) is true for any n thanks to nat-induct."
     (have c (forall [n nat] (P n))
           :by ((nat-induct P) Hz b))
     (qed c)))

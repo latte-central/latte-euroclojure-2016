@@ -60,6 +60,27 @@ Timing: 2:00 (total 6:00)
 
 # Slide 5
 
+We can go very far with this apparently very simple language.
+A thesis made by Church the inventor of the lambda-calculus in the nineteen-forties:
+ that every functions computable by a mechanical mean can be encoded in the
+ pure lambda-calculus.
+ 
+ For example, you have several ways to make pairs in Clojure. Although this is
+ not the simplest nor the most efficient way, you can use the pure lambda calculus
+  to do so. Without going into the details, the `pair` function uses closures to
+  record the two components of a pair, as well as a mean for accessing each
+  of one of them. This is the role of the `fst` and `snd` functions.
+  
+Note that this encoding is not very programmer-friendly, but the only important
+thing is that it works!
+
+We could go a long way with such encodings, but what I want to do now
+is to switch to a lambda-calculus suitable for doing mathematics.
+
+Timing: 2:00 (total 8:00)
+
+# Slide 6
+
 The kernel of the LaTTe library is also a lambda-calculus. The difference with
 pure lambda is that it is explicitly typed. It is in fact what logicians call
  a *type theory*.
@@ -69,9 +90,9 @@ also the case in logic and mathematics. But let's say that you need types
 to do mathematics with the lambda-calculus, and I guess even logicians agree
 with this statement.
 
-Timing: 1:00 (7:00)
+Timing: 1:00 (9:00)
 
-# Slide 6
+# Slide 7
 
 So in LaTTe you have a lambda-calculus with explicit types.
 As an example, let's consider again the identity function but this time
@@ -87,9 +108,9 @@ function by first supplying a type, and then a value of that type.
 We have here a nice example of a term depending on a type, a feature
  of System F, also called the polymorphic lambda-calculus.
 
-Timing: 1:00 (8:00)
+Timing: 1:00 (10:00)
 
-# Slide 7
+# Slide 8
 
 A question, then, is what is the type of the identity function.
 Without boring you with details, the type of a lambda is a forall.
@@ -106,18 +127,18 @@ The take away here is that:
 
 > The arrow type of functional programming is simply a special case of a universal quantification!
 
-Timing: 1:30 (9:30)
+Timing: 1:30 (11:30)
 
-# Slide 8
+# Slide 9
 
 For the composition function, we need three types A B C
 and we obtain the following type... Don't bother trying
 to understand this, just witness the fact that the type checker
  of LaTTe agrees.
 
-Timing: 1:30 (11:00)
+Timing: 1:30 (13:00)
 
-# Slide 9
+# Slide 10
 
 Maybe you saw it but something interesting happened.
 I was talking about types but when reading the types what
@@ -136,14 +157,50 @@ Here, we considered types to be logical propositions. And this
 is in fact one important facet of the famous Curry-Howard correspondence:
  the proposition-as-type interpretation of the typed lambda-calculus.
 
- Timing: 1:30 (12:30)
+ Timing: 1:30 (14:30)
 
-# Slide 10
+# Slide 11
+
+The pairing function has also a very interesting interpretation.
+I'll go quickly here but here is the explicitly-typed version
+of the pairing function. Let me know try to find its type.
+
+<code>
+
+Well, it works but this relatively complex type but I can give
+ you a simpler interpretation of it. Let me rewrite this as follows
+  and verify with the type checker.
+
+<code>
+
+The bottom line here is that the type of the pairing function is
+what logicians call the introduction rule for conjunction.
+
+Timing: 2:30 (17:00)
+
+# Slide 12
+
+And the first and second accessors are called the elimination rules for
+conjunction. 
+
+<code>
+
+From the conjunction of A and B you can get A, which is called the
+left-elimination rule.
+
+and of course you can get B also, by the right-elimination rule.
+
+So together with the pairing function, we have a complete logical characterization
+of conjunction.
+
+Timing: 1:30 (18:30)
+
+# Slide 13
 
 There is one final ingredient I need: a logic rule to make
 deductions. In Latin you would say that I need the modus ponens, but
  others would say the detachment rule, the cut rule, etc.
-
+ 
 This central part of logic says that
 if A implies B, and if A is true, then I can deduce
 that B is true also.
@@ -162,9 +219,9 @@ correspondence: that modus ponens exactly correspond to function application!
 If I apply a value of type A to a function from A to B, 
 then I will of course get a B!
 
-Timing : 2:00 (14:30)
+Timing : 2:00 (20:30)
 
-# Slide 11
+# Slide 14
 
 We saw that implication is just a special case of universal
 quantification. This also works for deduction.
@@ -182,9 +239,32 @@ term.
 
 So yes, Aristotle was right!
 
-Timing: 2:00 (16:30)
+Timing: 2:00 (22:30)
 
-# Slide 12
+# Slide 15
+
+We have know everything at hand to write our first proof.
+
+First let's state some logical proposition. That if A implies
+ B and if I have both C and A true then I can deduce that B is true.
+ 
+To prove this proposition, we will exploit another facet of the
+Curry-Howard correspondence. In a type theory such as LaTTe, to
+ prove that a proposition is true amounts to finding a term
+  whose type is the given proposition.
+
+This is called the proof-as-term interpretation. Thus you have
+ propositions-as-types together with proofs-as-terms.
+ 
+To introduce the two assumptions we use lambda's. So hypothesis H1 is
+ that A implies B and hypothesis H2 is that both C and A are true.
+ Now let me finish this and check that the type-checker agrees.
+ 
+Ok so our proposition is true!
+
+Timing: 2:00 (24:30)
+
+# Slide 16
 
 It is now time for a little pause...
 We learned that a lambda-calculus with explicit types
@@ -198,9 +278,9 @@ So what we need now are abstractions, and this is what is
 provided by the LaTTe proof assistant, in great part thanks
 to the Clojure environment itself.
 
-Timing: 1:00 (17:30)
+Timing: 1:00 (25:30)
 
-# Slide 13
+# Slide 17
 
 So LaTTe is a proof assistant: to let Clojure help us
 doing mathematics and proving things.
@@ -218,13 +298,32 @@ language for writing proofs. It is very concise having only 2 constructions,
  
 So let me give you an example of how things look when using LaTTe.
 
-Timing: 1:30 (19:00)
+Timing: 1:30 (27:00)
 
-# Slide 14, 15, etc.: Peano arithmetics 
+# Slide 18
 
-Timing:  19:00 max (38:00)
+Let's try to prove the same theorem we proved previously, but this
+time using the high-level LaTTe. Here, I have a proof using directly a term but...
 
-# Slide conclusion
+ooops ...
 
-Timing: 2:00 (40:00)
+Somethings wrong... Let me see... Of course! I have no proof for the
+`and-elim-right` theorem above! So LaTTe would not let you use a
+theorem if you did not provide a proof first.
+
+So let me give a proof.
+
+<code>
+
+Now everything's fine but it seems we gain nothing by using the
+LaTTe abstractions.
+
+So let's rewrite the proof term using the proof script
+
+Timing: 5:00 (32:00)
+
+
+# Slide 19 & 20 : Peano arithmetics 
+
+Timing: 5:00 (37:00)
 

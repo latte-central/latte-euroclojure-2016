@@ -25,7 +25,6 @@
 
 ;;; # To give credit where credit is due ...
 
-
 ;;; The theory underlying LaTTe (as well as its basic library)
 ;;; is heavily influenced by the following book:
 
@@ -41,12 +40,21 @@
 ;;;         ====================\\|//====================
 ;;;                         dwb `---`  
 
+;;; It is a wonderful book for (the few ?) people interested
+;;; in such topics
+
+;; (of course, you do *not* need to read the book to
+;; use LaTTe, or hopefully to understand this talk!).
+
+
 
 
 ;;; # Let's get started ...
 
-(ns latte-euroclojure-2016.core
-  "This is a talk about LaTTe given @ Euroclojure 2016."
+(ns latte-euroclojure-2016.full-long
+  "This is a talk about LaTTe given @ Euroclojure 2016.
+  (this is a preliminary version, too long but more
+  complete of course)"
 
   ;; These belong to logic ;-)
   (:refer-clojure :exclude [and or not])
@@ -74,12 +82,37 @@
 
 ((fn [x] x) 42)
 
+;; what just happened is called a <<<beta-reduction|||t>>>
+;; (a greek-ish translation for <<<function application|||t>>>)
+
 ;;; ### Another example: binary composition
 
 ((((fn [g] (fn [f] (fn [x] (f (g x)))))
    even?)                               ;; (==> int boolean)
    (fn [y] (if y "even" "odd")))        ;; (==> boolean String)
  42)
+
+
+
+;;; # Lambda the ultimate
+
+;;; ## Church thesis
+;;; All computable functions can be encoded in the pure lambda-calculus
+;;(only with single argument <<<fn|||t>>>'s, function application and variables)
+
+;;; ### Example: the pairing function
+
+(def pair (fn [x] (fn [y] (fn [z] ((z x) y)))))
+
+;;; and accessors (or eliminators as you'll see)
+
+(def fst (fn [p] (p (fn [x] (fn [y] x)))))
+(def snd (fn [p] (p (fn [x] (fn [y] y)))))
+
+;;; e.g.:
+
+(fst ((pair "hello") 42))
+(snd ((pair "hello") 42))
 
 
 
@@ -118,10 +151,15 @@
 
 ;;; # Types, really?
 
+;;; Yes! in LaTTe the 'lambda' abstractions are
+;;; explicitely typed...
+
 ;;; ### Example: the (type-generic) identity function
 
 (term (lambda [A :type]
         (lambda [x A] x)))
+
+;; ^^^ look ma! a System F-ish term depending on a type! ^^^
 
 ;; e.g.:  (((lambda [A :type] (lambda [x A] x)) 42) int)
 ;;        --> ((lambda [x int] x) 42)
@@ -131,34 +169,36 @@
 
 ;;; # Let's do some type-checking ...
 
-(check-type?
+;;; ##What is the type of the (type-generic) identity?
 
- ;; the lambda-term:
- 
+(check-type?
  (lambda [A :type]
    (lambda [x A] x))
 
  ;; is of type ...
 
- ✳)
- 
+ (forall [A :type]
+   (==> A A)))
+
+;; or (forall [A :type]
+;;      (forall [x A] A))
+
 
 
 ;;; # The type-generic composition function
 
 (check-type?
-
-  ;; the lambda-term:
-
  (lambda [A B C :type]
    (lambda [g (==> A B)]
      (lambda [f (==> B C)]
        (lambda [x A]
          (f (g x))))))
 
- ;; is of type ...
+  ;; ... of type
 
- ✳)
+ (forall [A B C :type]
+   (==> (==> A B) (==> B C)
+        (==> A C))))
 
 
 
@@ -170,6 +210,7 @@
 
 ;;; (forall [A :type]
 ;;;   (==> A A))
+;; "A implies A"  (reflexivity of implication)
 
 ;;; ###- the type of the composition function on A,B and C is:
 
@@ -177,6 +218,61 @@
 ;;;   (==> (==> A B)
 ;;;        (==> B C)
 ;;;        (==> A C)))
+;; if "A implies B" and "B implies C" then "A implies C"
+;; (transitivity of implication)
+
+;;; ==> we've just experienced <<<Proposition-as-Type|||t>>> (PaT)
+;;;     part of the <<<Curry-Howard correspondance|||t>>>
+
+
+
+;;; # The type-generic pairing function
+
+;; reminder
+(def pair (fn [x] (fn [y] (fn [z] ((z x) y)))))
+
+;; a type-generic version
+(check-type? [A :type] [B :type] ;; <-- this is called the 'context'
+   (lambda [x A]
+     (lambda [y B]
+       (lambda [C :type]
+         (lambda [z (==> A B C)]
+           ((z x) y)))))
+   ;; of type...
+
+   (==> A B
+        (and A B)))
+
+;; or  (==> A B
+;;       (forall [C :type]
+;;          (==> (==> A B C)
+;;               C)))
+
+
+
+;;; # Accessors = elimination rules
+
+;; reminders
+(def fst (fn [p] (p (fn [x] (fn [y] x)))))
+(def snd (fn [p] (p (fn [x] (fn [y] y)))))
+
+(check-type? [A :type] [B :type]
+   (lambda [p (and A B)]
+     ((p A) (lambda [x A] (lambda [y B] x))))
+   ;; of type
+   (==> (and A B)
+        A))
+
+;; --> this is <<<latte.prop/and-elim-left|||t>>>
+
+(check-type? [A :type] [B :type] ;; <-- this is called 'the context'
+   (lambda [p (and A B)]
+     ((p B) (lambda [x A] (lambda [y B] y))))
+   ;; of type
+   (==> (and A B)
+        B))
+
+;; --> this is <<<latte.prop/and-elim-right|||t>>>
 
 
 
@@ -192,13 +288,16 @@
 
 (check-type? [A :type] [B :type]
 
-   ;; find a term ...
-   ✳
+   (lambda [f (==> A B)]
+     (lambda [x A]
+       (f x)))
 
    ;; of type
    
    (==> (==> A B) A
         B))
+
+;; Modus ponens is beta-reduction (function application) it is that simple!
 
 
 
@@ -211,9 +310,11 @@
  [Thing :type] [man (==> Thing :type)] [mortal (==> Thing :type)]
  [socrate Thing]
 
- ✳
+ (lambda [H1 (forall [t Thing] (==> (man t) (mortal t)))]
+   (lambda [H2 (man socrate)]
+     ((H1 socrate) H2)))
  
- ;; ^^^ Was Aristotle right? ^^^
+ ;; Was Aristotle right?
  
  (==> (forall [t Thing]
         (==> (man t) (mortal t)))
@@ -231,12 +332,17 @@
 
 (check-type? [A :type] [B :type] [C :type]
              
-  ✳
-             
+  (lambda [H1 (==> A B)]
+    (lambda [H2 (and C A)]
+      (H1 ((H2 A) (lambda [x C] (lambda [y A] y))))))
+
   ;; ^^^ the proof term ^^^
   
   (==> (==> A B) (and C A)
        B))
+
+;; This is the <<<Proof-as-Term|||t>>> part
+;;     of the <<<Curry-Howard correspondance|||t>>> 
 
 
 
@@ -284,6 +390,40 @@
 
 
 
+;;; # Our first LaTTe theorems ...
+
+(defthm and-elim-right
+  "Right elimination for conjunction."
+  [[A :type] [B :type]]
+  (==> (and A B)
+       B))
+
+;; Warning: proof required !
+(proof and-elim-right
+    :term
+  (lambda [H (and A B)]
+    ((H B) (lambda [x A] (lambda [y B] y)))))
+
+(defthm dummy-theorem
+  "This is an example theorem"
+  [[A :type] [B :type] [C :type]]
+  (==> (==> A B) (and C A)
+       B))
+
+(proof dummy-theorem
+    :script
+  (assume [H1 (==> A B)
+           H2 (and C A)]
+    (have a A :by ((and-elim-right C A) H2))
+    (have b B :by (H1 a))
+    (qed b)))
+;;    :term
+;;  (lambda [H1 (==> A B)]
+;;    (lambda [H2 (and C A)]
+;;      (H1 ((and-elim-right C A) H2)))))
+
+
+
 ;;; # Let's do some real maths...
 
 ;;; ### Our objective (in the few minutes to come):
@@ -299,17 +439,44 @@
 ;;; # The Peano arithmetics
 ;;; ### in (a bunch of) blinks of an eye
 
-"The first Peano primive: ℕ is a primitive set"
+(defaxiom nat
+  "The first Peano primive: ℕ is a primitive set"
+  []
+  :type)
 
-"The second Peano primitive: 0 is in ℕ"
+(defaxiom zero
+  "The second Peano primitive: 0 is in ℕ"
+  []
+  nat)
 
+(defaxiom succ
 "The third Peano primitive: the successor function of type ℕ ⟶ ℕ"
+  []
+  (==> nat nat))
 
-"The first Peano axiom: there is no successor in ℕ that equals 0"
+(defaxiom nat-zero
+  "The first Peano axiom: there is no successor in ℕ that equals 0"
+  []
+  (forall [n nat]
+    (not (equal nat (succ n) zero))))
 
-"The second Peano axiom: the successor function is injective"
+(defaxiom nat-succ-inj
+  "The second Peano axiom: the successor function is injective"
+  []
+  (forall [n m nat]
+    (==> (equal nat (succ n) (succ m))
+         (equal nat n m))))
 
-"The third Peano axiom: induction principle on ℕ"
+(defaxiom nat-induct
+  "The third Peano axiom: induction principle on ℕ"
+  [[P (==> nat :type)]]
+  (==> (P zero)
+       (forall [k nat]
+         (==> (P k) (P (succ k))))
+       (forall [n nat] (P n))))
+
+
+
                
 
 
@@ -324,18 +491,24 @@
 
 (proof nat-case
   :script
-  "First we state our assumptions."
-
-  "Now we proceed by induction on n."
-
-  "base case (n=0): trivial since (P zero) by Hz"
-  "inductive case. Suppose (P k) for some natural number k"
-
-  "Let's prove that (P (succ k))"
-  "Hence for any k (==> (P k) (P succ k))"
-
-  "Thus (P n) is true for any n thanks to nat-induct."
-  )
+  "First we state our assumptions."     
+  (assume [Hz (P zero)
+           HS (forall [k nat] (P (succ k)))]
+          "Now we proceed by induction on n."
+          "base case (n=0): trivial since (P zero) by Hz"
+          "inductive case. Suppose (P k) for some natural number k"
+    (assume [k nat
+             Hind (P k)]
+            "Let's prove that (P (succ k))"
+            (have a (P (succ k)) :by (HS k))
+            "Hence for any k (==> (P k) (P succ k))"
+      (have b (forall [k nat]
+                (==> (P k) (P (succ k))))
+            :discharge [k Hind a]))
+    "Thus (P n) is true for any n thanks to nat-induct."
+    (have c (forall [n nat] (P n))
+          :by ((nat-induct P) Hz b))
+    (qed c)))
 
 (definition nat-split
   "The split of natural numbers."
@@ -356,28 +529,43 @@ another integer"
   "We do the proof by case analysis on n."
   "1) case n=0"
   "0 = 0  by reflexivity"
-  ;; TODO
+  (have a1 (equal nat zero zero)
+        :by (eq/eq-refl nat zero))
   "hence the base case."
-  ;; TODO
-
-  "2) case n=k+1 assuming an arbitrary k"
+  (have a (nat-split zero)
+        :by ((p/or-intro-left
+              (equal nat zero zero)
+              (exists [m nat]
+                (equal nat zero (succ m)))) a1))
+  "2) case n=k+1 for an arbitrary k"
+  (assume [k nat]
     "Let the predicate Q(m) such that k+1=m+1"
-    ;; TODO
+    (have Q _ :by (lambda [m nat] (equal nat (succ k) (succ m))))
     "Since  k+1 = k+1 by reflexivity we know that Q(k) is true."
-    ;; TODO
+    (have b1 (Q k)
+          :by (eq/eq-refl nat (succ k)))
     "hence there exists an m such that k+1=m+1 (namely k)"
-    ;; TODO
-    "from this we get that nat-split for ()k+1) is true."
-    ;; TODO 
-    "hence we can deduce the case for k+1."
-    ;; TODO
+    (have b2 (exists [m nat]
+                    (equal nat (succ k) (succ m)))
+          :by ((q/ex-intro nat Q k) b1))
+    "from this we get that P(k+1) is true."
+    (have b3 (nat-split (succ k))
+          :by ((p/or-intro-right (equal nat (succ k) zero)
+                                 (exists [m nat]
+                                   (equal nat (succ k) (succ m)))) b2))
+    "hence we can deduce the case for k+1 from the case of k."
+    (have b (forall [k nat]
+              (nat-split (succ k)))
+          :discharge [k b3]))
   "we can conclude by applying the case analysis theorem."
-  ;; TODO
-  )
+  (have concl _
+        :by ((nat-case nat-split) a ))
+  (qed concl))
     
 
 
 ;;; # Yes, we could!
+;;; (I hope you enjoyed the ride...)
 
 ;;; ### Mathematics can be fun, (almost) as fun as live-coding in Clojure!
 ;; but ... wait! this *is* live-coding in Clojure!
@@ -405,8 +593,7 @@ another integer"
 
 (proof life-universe-rest
     :script
-  "TODO"
-  )
+  "TODO")
 
 ;;;
 ;;; ### Let's play together at: https://github.com/fredokun/LaTTe
