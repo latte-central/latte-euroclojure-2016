@@ -154,3 +154,8 @@
 (set-face-attribute 'menu nil :height 100)
 (set-face-attribute 'button nil :height 100)
 
+;; ido mode
+
+(setq ido-enable-flex-matching t)
+(setq ido-everywhere t)
+(ido-mode 1)

@@ -324,7 +324,7 @@
   []
   (==> nat nat))
 
-(defaxiom nat-zero
+(defaxiom nat-succ-not-surj
   "The first Peano axiom: there is no successor in ℕ that equals 0"
   []
   (forall [n nat]
@@ -344,10 +344,7 @@
        (forall [k nat]
          (==> (P k) (P (succ k))))
        (forall [n nat] (P n))))
-
-
-
-               
+           
 
 
 ;;; # A proof by induction
@@ -383,54 +380,56 @@
 (definition nat-split
   "The split of natural numbers."
   [[n nat]]
-  (or (equal nat n zero)
-      (exists [m nat]
-        (equal nat n (succ m)))))
+  (==> (not (equal nat n zero))
+       (exists [m nat]
+         (equal nat n (succ m)))))
   
 (defthm nat-strong
-  "A natural integer is either zero or the successor of
+  "A natural integer that is not zero is the successor of
 another integer"
   []
   (forall [n nat]
     (nat-split n)))
-    
+
 (proof nat-strong
     :script
   "We do the proof by case analysis on n."
-  "1) case n=0"
-  "0 = 0  by reflexivity"
-  (have a1 (equal nat zero zero)
-        :by (eq/eq-refl nat zero))
-  "hence the base case."
-  (have a (nat-split zero)
-        :by ((p/or-intro-left
-              (equal nat zero zero)
-              (exists [m nat]
-                (equal nat zero (succ m)))) a1))
+  "1) case n=0 we show a contradiction"
+  "The hypothesis is that zero<>zero"
+  (assume [Hz (not (equal nat zero zero))]
+    "but of course zero=zero by reflexivity"
+    (have <a1> (equal nat zero zero) :by (eq/eq-refl nat zero))
+    "hence there is a contradiction"
+    (have <a2> p/absurd :by ((p/absurd-intro (equal nat zero zero))
+                             <a1> Hz))
+    "and from a contradiction we can get anything..."
+    (have <a3> (exists [m nat]
+                 (equal nat zero (succ m)))
+          :by (<a2> (exists [m nat]
+                      (equal nat zero (succ m)))))
+    (have <a> (nat-split zero) :discharge [Hz <a3>]))
   "2) case n=k+1 for an arbitrary k"
-  (assume [k nat]
-    "Let the predicate Q(m) such that k+1=m+1"
-    (have Q _ :by (lambda [m nat] (equal nat (succ k) (succ m))))
-    "Since  k+1 = k+1 by reflexivity we know that Q(k) is true."
-    (have b1 (Q k)
-          :by (eq/eq-refl nat (succ k)))
-    "hence there exists an m such that k+1=m+1 (namely k)"
-    (have b2 (exists [m nat]
-                    (equal nat (succ k) (succ m)))
-          :by ((q/ex-intro nat Q k) b1))
-    "from this we get that P(k+1) is true."
-    (have b3 (nat-split (succ k))
-          :by ((p/or-intro-right (equal nat (succ k) zero)
-                                 (exists [m nat]
-                                   (equal nat (succ k) (succ m)))) b2))
-    "hence we can deduce the case for k+1 from the case of k."
-    (have b (forall [k nat]
-              (nat-split (succ k)))
-          :discharge [k b3]))
-  "we can conclude by applying the case analysis theorem."
-  (have concl _
-        :by ((nat-case nat-split) a ))
-  (qed concl))
+  "The assumption is that k+1<>0 is distinct from zero (which is vacuously true,
+but this is not in fact important)" 
+    (assume [k nat
+             Hk (not (equal nat (succ k) zero))]
+      "Let the predicate Q(m) such that k+1=m+1"
+      (have Q _ :by (lambda [m nat] (equal nat (succ k) (succ m))))
+      "Since  k+1 = k+1 by reflexivity we know that Q(k) is true."
+      (have <b1> (Q k)
+            :by (eq/eq-refl nat (succ k)))
+      "hence there exists an m such that k+1=m+1 (namely k)"
+      (have <b2> (exists [m nat]
+                   (equal nat (succ k) (succ m)))
+            :by ((q/ex-intro nat Q k) <b1>))
+      "hence we can deduce the case for k+1 from the case of k."
+      (have <b> (forall [k nat]
+                  (nat-split (succ k)))
+            :discharge [k Hk <b2>]))
+    "we can conclude by applying the case analysis theorem."
+    (have <concl> _
+          :by ((nat-case nat-split) <a> <b>))
+    (qed <concl>))
     
 
 
