@@ -40,7 +40,7 @@
 ;;;         ====================\\|//====================
 ;;;                         dwb `---`  
 
-;;; It is a wonderful book for (the few ?) people interested
+;;; It is a wonderful book for (the very few ?) people interested
 ;;; in such topics
 
 ;; (of course, you do *not* need to read the book to
@@ -294,15 +294,225 @@
 
 
 
-;;; # Let's do some real maths...
+;;; # Let's do the maths...
 
-;;; ### Our objective (in the few minutes to come):
+;;; ### Our objective (in the few minutes to come):
 
-;;; 1) live-code in LaTTe the <<<Peano arithmetics|||t>>>
-;;; for natural numbers, and
+;;; 1) a glimpse of <<<natural deduction|||(lambda (x) t)>>> (logic)
 
-;;; 2) demontrate an important inductive property
-;;; about them...
+;;; 2) a bit of (typed) <<<set theory|||(lambda (x) t)>>>
+
+;;; 3) a dip of <<<equality|||(lambda (x) t)>>> (according to Mr.Leibniz)
+
+;;; 4) a squint into <<<Peano arithmetics|||(lambda (x) t)>>>
+;; (if time permits, but time won't !)
+
+
+
+;;; # 1) a glimpse of Natural Deduction
+
+;;; A simple characterization of (most) logical constructions
+;;; based on <<<introduction rules|||(lambda (x)t)>>>
+;; (how to deduce the construction?)
+;;; and <<<elimination rules|||(lambda (x)t)>>>
+;; (how to destruct?)
+
+;;; ## Example: conjunction
+
+;;; ### Introduction rule
+
+;;;      A      B
+;;;   ============== (and-intro)
+;;;      (and A B)
+
+;;; ### Elimination rules
+
+;;;     (and A B)                         (and A B)
+;;;  ============== (and-elim-left)    ============== (and-elim-right)
+;;;        A                                 B
+
+
+
+;;; # Conjunction in Type Theory (1/2)
+
+;;; First a somewhat cryptic definition
+
+(definition and-  ;; nameclash!
+  "Conjunction in Type Theory"
+  [[A :type] [B :type]]
+  (forall [C :type]
+    (==> (==> A B C)
+         C)))
+
+;;; Then the introduction rule
+(defthm and-intro- ""
+  [[A :type] [B :type]]
+  (==> A B
+       (and A B)))
+
+(proof and-intro-
+    :script
+  (assume [x A
+           y B]
+    (assume [C :type
+             f (==> A B C)]
+      (have <a> (==> B C) :by (f x))
+      (have <b> C :by (<a> y))
+      (have <c> (and A B) :discharge [C f <b>]))
+    (qed <c>)))
+
+
+
+
+;;; # Conjunction in Type Theory (2/2)
+
+;;; Finally the elimination rules
+
+(defthm and-elim-left- ""
+  [[A :type] [B :type]]
+  (==> (and A B)
+       A))
+
+(proof and-elim-left-
+    :script
+  (assume [p (and A B)]
+    (have <a> (==> (==> A B A) A)
+          :by (p A))
+    (assume [x A
+             y B]
+      (have <b> A :by x)
+      (have <c> (==> A B A)
+            :discharge [x y <b>]))
+    (have <d> A :by (<a> <c>))
+    (qed <d>)))
+
+;; exercice : and-elim-right-  (solution? p/and-elim-right)
+
+
+
+;;; # Conjunction introduction looks familiar!
+
+;;; Let's slowly remove types in <<<and-intro-|||(lambda (x)t)>>>
+
+(check-type?
+ [A :type] [B :type]
+ (lambda [x A]
+   (lambda [y B]
+     (lambda [C :type]
+       (lambda [f (==> A B C)]
+         ((f x) y)))))  ;; and-intro- as a term
+
+ (==> A B (and A B)))
+
+;; In Clojure :
+(def mk-and (fn [x] (fn [y] (fn [f] ((f x) y)))))
+
+
+
+;;; # Conjunction elimination looks familiar too!
+
+;;; Let's slowly remove types in <<<and-elim-left-|||(lambda (x)t)>>>
+
+(check-type?
+ [A :type] [B :type]
+ (lambda [p (and A B)]
+   ((p A) (lambda [x A]
+            (lambda [y B]
+              x))))  ;; and-elim-left- as a term
+
+ (==> (and A B) A))
+
+;; In Clojure
+(def left (fn [p] (p (fn [x] (fn [y] x)))))
+
+
+
+;;; # Conjunction as computation (in Clojure)
+
+;; We have:
+(def mk-and (fn [x] (fn [y] (fn [f] ((f x) y)))))
+(def left (fn [p] (p (fn [x] (fn [y] x)))))
+(def right (fn [p] (p (fn [x] (fn [y] y)))))
+
+;; Have these functions any computational meaning?
+
+(def p ((mk-and "hello") 42))
+(left p)
+(right p)
+
+;; The take ayway: pairs are (typed as) logical conjunctions!
+
+
+
+;;; # 2) a bit of (typed) Set Theory
+
+;;; Why the set <<<{p:program | p halts}|||(lambda(x)t)>>> cannot be a type in LaTTe?
+;;; ==> because unlike type inhabitation, set membership is not decidable
+
+;;; So how to represent a (typed) set in LaTTe?
+;;; The simplest approach is to use consider <<<sets as predicates|||(lambda(x)t)>>>
+
+(definition set- ;; nameclash!
+  "The type of a set in type theory"
+  [[T :type]]
+  (==> T :type))
+
+(definition elem-
+  "Set membership"
+  [[T :type] [x T] [s (set- T)]]
+  (s x))
+
+;;; example: the empty set of type T
+
+(definition empty-set ""
+  [[T :type]]
+  (lambda [x T] p/absurd))
+
+(defthm empty-set-empty ""
+  [[T :type]]
+  (forall [x T] (not (elem- T x (empty-set T)))))
+
+(proof empty-set-empty
+    :script
+  (assume [x T]
+    (assume [Hx (elem- T x (empty-set T))]
+      (have <a> p/absurd :by Hx)
+      (have <b> (not (elem- T x (empty-set T)))
+            :discharge [Hx <a>]))
+    (qed <b>)))
+
+
+
+;;; # Set intersection
+
+(definition intersection
+  "Intersection of sets"
+  [[T :type] [s1 (set- T)] [s2 (set- T)]]
+  (lambda [x T]
+    (and (elem- T x s1)
+         (elem- T x s2))))
+
+(defthm inter-empty ""
+  [[T :type]]
+  (forall [s (set- T)]
+    (forall [x T]
+      (not (elem- T x (intersection T (empty-set T) s))))))
+
+(proof inter-empty
+    :script
+  (assume [s (set- T)
+           x T]
+    (assume [Hx (elem- T x (intersection T (empty-set T) s))]
+      (have <a> p/absurd :by (p/%and-elim-left Hx))
+      (have <b> (not (elem- T x (intersection T (empty-set T) s)))
+            :discharge [Hx <a>]))
+    (qed <b>)))
+
+;; Exercice: union
+
+
+
+;;; # 3) A peek at equality ... blabla TODO
 
 
 
@@ -433,17 +643,17 @@ but this is not in fact important)"
     
 
 
-;;; # Yes, we could!
-;;; (I hope you enjoyed the ride...)
+;;; # Aftermath ...
 
 ;;; ### Mathematics can be fun, (almost) as fun as live-coding in Clojure!
 ;; but ... wait! this *is* live-coding in Clojure!
 
 ;;; Formalizing and proving things can be a very addictive <<<puzzle game|||(lambda (x) t)>>>
-;;; - with both a <<<single player mode|||(lambda (x) t)>>> and <<<multiplayer cooperation|||(lambda (x) t)>>> available!
+;;; - with both a <<<single player|||(lambda (x) t)>>>
+;;;   and <<<multiplayer cooperation|||(lambda (x) t)>>> modes available!
 ;; (MMO being considered)
 
-;;; - An un limited number of puzzles awaits you:
+;;; - An unlimited number of puzzles:
 
 ;;;    * starters: propositional logic, basic quantifiers, etc.
 
@@ -466,7 +676,7 @@ but this is not in fact important)"
 
 ;;;
 ;;; ### Let's play together at: https://github.com/fredokun/LaTTe
-;;; you're just a `lein new my-cool-maths` away...
+;;; you're just a `lein new my-cool-maths-in-clojure` away...
 ;; (no? really? how unfortunate :~( )
 
 
