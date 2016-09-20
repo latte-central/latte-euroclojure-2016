@@ -481,10 +481,18 @@
 
 ;; Remark: there is no general definition of complement in ZFC set theory
 
+;;; ### Interestingly ...
+;;; In Clojure a (finite) set is also a predicate!
+(#{1 2 3} 2)
+(#{1 2 3} 4)
+
+;; in Latte:
+;;; (lambda [x nat] (or (equal nat x 1) (equal nat x 2) (equal nat x 3)))
+
 
 
 
-;;; # Example: Set intersection
+;;; # Example 3: Set intersection
 
 (definition intersection
   "Intersection of sets"
