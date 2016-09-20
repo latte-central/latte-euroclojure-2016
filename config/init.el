@@ -66,7 +66,7 @@
 (tool-bar-mode -1)
 
 ;; split window horizontally
-(setq split-width-threshold 9999)
+(setq split-width-threshold 0)
 
 (require 'live-clojure-talks)
 

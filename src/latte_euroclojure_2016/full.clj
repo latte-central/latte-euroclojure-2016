@@ -54,8 +54,8 @@
 (ns latte-euroclojure-2016.full
   "This is a talk about LaTTe given @ Euroclojure 2016."
 
-  ;; These belong to logic ;-)
-  (:refer-clojure :exclude [and or not])
+  ;; These belong to logic and mathematics ;-)
+  (:refer-clojure :exclude [and or not set complement])
 
   ;; LaTTe core and main top-level forms
   (:require [latte.core :as latte
@@ -302,7 +302,7 @@
 
 ;;; 2) a bit of (typed) <<<set theory|||(lambda (x) t)>>>
 
-;;; 3) a dip of <<<equality|||(lambda (x) t)>>> (according to Mr.Leibniz)
+;;; 3) a peek at <<<equality|||(lambda (x) t)>>> (according to Mr.Leibniz)
 
 ;;; 4) a squint into <<<Peano arithmetics|||(lambda (x) t)>>>
 ;; (if time permits, but time won't !)
@@ -313,7 +313,7 @@
 
 ;;; A simple characterization of (most) logical constructions
 ;;; based on <<<introduction rules|||(lambda (x)t)>>>
-;; (how to deduce the construction?)
+;; (how to construct?)
 ;;; and <<<elimination rules|||(lambda (x)t)>>>
 ;; (how to destruct?)
 
@@ -335,7 +335,7 @@
 
 ;;; # Conjunction in Type Theory (1/2)
 
-;;; First a somewhat cryptic definition
+;;; First a somewhat cryptic definition:
 
 (definition and-  ;; nameclash!
   "Conjunction in Type Theory"
@@ -344,11 +344,12 @@
     (==> (==> A B C)
          C)))
 
-;;; Then the introduction rule
+;;; Then the introduction rule: 
+
 (defthm and-intro- ""
   [[A :type] [B :type]]
   (==> A B
-       (and A B)))
+       (and- A B)))
 
 (proof and-intro-
     :script
@@ -358,7 +359,7 @@
              f (==> A B C)]
       (have <a> (==> B C) :by (f x))
       (have <b> C :by (<a> y))
-      (have <c> (and A B) :discharge [C f <b>]))
+      (have <c> (and- A B) :discharge [C f <b>]))
     (qed <c>)))
 
 
@@ -370,12 +371,12 @@
 
 (defthm and-elim-left- ""
   [[A :type] [B :type]]
-  (==> (and A B)
+  (==> (and- A B)
        A))
 
 (proof and-elim-left-
     :script
-  (assume [p (and A B)]
+  (assume [p (and- A B)]
     (have <a> (==> (==> A B A) A)
           :by (p A))
     (assume [x A
@@ -402,10 +403,13 @@
        (lambda [f (==> A B C)]
          ((f x) y)))))  ;; and-intro- as a term
 
- (==> A B (and A B)))
+ (==> A B (and- A B)))
 
 ;; In Clojure :
-(def mk-and (fn [x] (fn [y] (fn [f] ((f x) y)))))
+(fn [x]
+  (fn [y]
+    (fn [f]
+      ((f x) y))))
 
 
 
@@ -415,15 +419,15 @@
 
 (check-type?
  [A :type] [B :type]
- (lambda [p (and A B)]
+ (lambda [p (and- A B)]
    ((p A) (lambda [x A]
             (lambda [y B]
               x))))  ;; and-elim-left- as a term
 
- (==> (and A B) A))
+ (==> (and- A B) A))
 
 ;; In Clojure
-(def left (fn [p] (p (fn [x] (fn [y] x)))))
+(fn [p] (p (fn [x] (fn [y] x))))
 
 
 
@@ -450,61 +454,58 @@
 ;;; ==> because unlike type inhabitation, set membership is not decidable
 
 ;;; So how to represent a (typed) set in LaTTe?
-;;; The simplest approach is to use consider <<<sets as predicates|||(lambda(x)t)>>>
+;;; A very effective approach is to use consider <<<sets as predicates|||(lambda(x)t)>>>
 
-(definition set- ;; nameclash!
+(definition set
   "The type of a set in type theory"
   [[T :type]]
   (==> T :type))
 
-(definition elem-
+(definition elem
   "Set membership"
-  [[T :type] [x T] [s (set- T)]]
+  [[T :type] [x T] [s (set T)]]
   (s x))
 
-;;; example: the empty set of type T
+;;; ### Example 1: the empty set of type T
 
 (definition empty-set ""
   [[T :type]]
   (lambda [x T] p/absurd))
 
-(defthm empty-set-empty ""
-  [[T :type]]
-  (forall [x T] (not (elem- T x (empty-set T)))))
+;;; ### Example 2: the complement of a set
 
-(proof empty-set-empty
-    :script
-  (assume [x T]
-    (assume [Hx (elem- T x (empty-set T))]
-      (have <a> p/absurd :by Hx)
-      (have <b> (not (elem- T x (empty-set T)))
-            :discharge [Hx <a>]))
-    (qed <b>)))
+(definition complement ""
+  [[T :type] [s (set T)]]
+  (lambda [x T]
+    (not (elem T x s))))
+
+;; Remark: there is no general definition of complement in ZFC set theory
+
 
 
 
-;;; # Set intersection
+;;; # Example: Set intersection
 
 (definition intersection
   "Intersection of sets"
-  [[T :type] [s1 (set- T)] [s2 (set- T)]]
+  [[T :type] [s1 (set T)] [s2 (set T)]]
   (lambda [x T]
-    (and (elem- T x s1)
-         (elem- T x s2))))
+    (and (elem T x s1)
+         (elem T x s2))))
 
 (defthm inter-empty ""
   [[T :type]]
-  (forall [s (set- T)]
+  (forall [s (set T)]
     (forall [x T]
-      (not (elem- T x (intersection T (empty-set T) s))))))
+      (not (elem T x (intersection T (empty-set T) s))))))
 
 (proof inter-empty
     :script
-  (assume [s (set- T)
+  (assume [s (set T)
            x T]
-    (assume [Hx (elem- T x (intersection T (empty-set T) s))]
+    (assume [Hx (elem T x (intersection T (empty-set T) s))]
       (have <a> p/absurd :by (p/%and-elim-left Hx))
-      (have <b> (not (elem- T x (intersection T (empty-set T) s)))
+      (have <b> (not (elem T x (intersection T (empty-set T) s)))
             :discharge [Hx <a>]))
     (qed <b>)))
 
@@ -512,7 +513,54 @@
 
 
 
-;;; # 3) A peek at equality ... blabla TODO
+;;; # 3) A peek at equality
+
+;;; Equality is a non-trivial programming aspect
+;;; There are basically two approaches:
+
+;;; 1) polymorphic equality (e.g. Clojure, Common Lisp, Ocaml)
+;;; 2) user-definable equality (e.g. Java, Haskell, Python)
+
+;;; ... with strengthes and drawbacks, but
+;;; in both cases one can easily shoots oneself in the foot...
+;; (think about testing...)
+
+;;; ### Question
+;;; What about a  logical characterization? 
+
+
+
+;;; # Leibniz's indiscernibility of identicals
+
+(definition equal- ;; nameclash
+  "Mr. Leibjniz says..."
+  [[T :type] [x T] [y T]]
+  (forall [P (==> T :type)]
+    (<=> (P x) (P y))))
+
+;; As a consequence:
+
+(defthm eq-cong- ""
+  [[T :type] [U :type] [f (==> T U)]
+   [x T] [y T]]
+  (==> (equal T x y)
+       (equal U (f x) (f y))))
+
+;; (proof is non-trivial, cf. <<<latte.equal/eq-cong|||(lambda(x)t)>>>)
+
+;;; ### Clojure counter-example
+;; (but there's one for any programming language
+;; except for pointer equality)
+
+(= [1 2 3 4] (range 1 5))
+
+;; breaking equal
+(seq? [1 2 3 4])
+(seq? (range 1 5))
+
+;; breaking eq/cong
+(get [1 2 3 4] 2)
+(get (range 1 5) 2)
 
 
 
@@ -667,7 +715,7 @@ but this is not in fact important)"
 ;;; # ... and what about a real challenge?
 
 (defthm life-universe-rest
-  "" [[Algos :type] [P Algos] [NP Algos]]
+  "" [[Algos :type] [P (set Algos)] [NP (set Algos)]]
   (not (equal Algos P NP))) ;; or is-it?
 
 (proof life-universe-rest
