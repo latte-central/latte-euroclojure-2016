@@ -281,16 +281,16 @@
 ;;; ## About LaTTe
 ;;; LaTTe is a proof assistant implemented as a Clojure library
 ;;; with top-level forms for axioms, definitions, theorems and proofs.
-;; available on Clojars: <<<[latte "0.3.2-SNAPSHOT"]|||(lambda (x) t)>>>
+;; available on Clojars: <<<[latte "0.3.3-SNAPSHOT"]|||(lambda (x) t)>>>
 
 ;;; ## Notable features
 
 ;;; - any Clojure Development environment can be used to do maths!
 ;; (e.g. I use both Cider and Gorilla Repl, sometimes together via nrepl...)
 
-;;; - it leverages the Clojure (JVM/Maven) ecosystem for <<<proving in the large|||t>>>
+;;; - it leverages the Clojure (JVM/Maven) ecosystem for <<<proving in the large|||(lambda(x)t)>>>
 
-;;; - it supports a DSL for declarative proof scripts <<<<-- hot!|||t>>>
+;;; - it supports a DSL for declarative proof scripts <<<<-- hot!|||(lambda(x)t)>>>
 
 
 
@@ -524,13 +524,15 @@
 ;;; # 3) A peek at equality
 
 ;;; Equality is a non-trivial programming aspect
+
 ;;; There are basically two approaches:
 
 ;;; 1) polymorphic equality (e.g. Clojure, Common Lisp, Ocaml)
+
 ;;; 2) user-definable equality (e.g. Java, Haskell, Python)
 
 ;;; ... with strengthes and drawbacks, but
-;;; in both cases one can easily shoots oneself in the foot...
+;;; in both cases one can easily shoot oneself in the foot...
 ;; (think about testing...)
 
 ;;; ### Question
@@ -541,7 +543,7 @@
 ;;; # Leibniz's indiscernibility of identicals
 
 (definition equal- ;; nameclash
-  "Mr. Leibjniz says..."
+  "Mr. Leibniz says..."
   [[T :type] [x T] [y T]]
   (forall [P (==> T :type)]
     (<=> (P x) (P y))))
@@ -551,8 +553,8 @@
 (defthm eq-cong- ""
   [[T :type] [U :type] [f (==> T U)]
    [x T] [y T]]
-  (==> (equal T x y)
-       (equal U (f x) (f y))))
+  (==> (equal- T x y)
+       (equal- U (f x) (f y))))
 
 ;; (proof is non-trivial, cf. <<<latte.equal/eq-cong|||(lambda(x)t)>>>)
 
