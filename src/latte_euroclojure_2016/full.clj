@@ -711,20 +711,23 @@ but this is not in fact important)"
 ;;;   and <<<multiplayer cooperation|||(lambda (x) t)>>> modes available!
 ;; (MMO being considered)
 
-;;; - An unlimited number of puzzles:
+;;; - An almighty adversary: <<<mathematics|||(lambda(x)t)>>>
+
+;;; - An <<<unlimited|||(lambda(x)t)>>> number of puzzles:
 
 ;;;    * starters: propositional logic, basic quantifiers, etc.
 
 ;;;    * serious challenges: numbers, inductive types, recursive functions, etc.
-;;    (way better than Sudoku and even kakuro)
+;;    (way more captivating than Sudoku and even kakuro)
 
 ;;;    * professional-grade puzzles: modern mathematics
+;; (new puzzles invented everyday...)
 
 
 
 ;;; # ... and what about a real challenge?
 
-(defthm life-universe-rest
+(defthm one-million-dollar-baby
   "" [[Algos :type] [P (set Algos)] [NP (set Algos)]]
   (not (equal Algos P NP))) ;; or is-it?
 
