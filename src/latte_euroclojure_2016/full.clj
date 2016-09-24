@@ -274,7 +274,7 @@
 ;;; # The LaTTe proof assistant
 
 ;;; ## Proof assistant
-;;; a tool that allows to describe mathematical content on
+;;; a tool that allows to formulate mathematical content on
 ;;; a computer, and assists in the mathematician's routine: proving things!
 
 
