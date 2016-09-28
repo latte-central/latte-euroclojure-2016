@@ -62,7 +62,7 @@
              :refer [definition defthm defaxiom defnotation
                      forall lambda ==>
                      assume have proof try-proof
-                     term type-of check-type?]]
+                     term type-of type-check?]]
 
   ;; ... the "standard" library (propositions, quantifiers and equality) 
             [latte.prop :as p :refer [<=> and or not]]
@@ -147,7 +147,7 @@
 
 ;;; ##What is the type of the (type-generic) identity?
 
-(check-type?
+(type-check?
  (lambda [A :type]
    (lambda [x A] x))
 
@@ -163,7 +163,7 @@
 
 ;;; # The type-generic composition function
 
-(check-type?
+(type-check?
  (lambda [A B C :type]
    (lambda [g (==> A B)]
      (lambda [f (==> B C)]
@@ -212,7 +212,7 @@
 ;;; ### and if it is the case that "A holds"
 ;;; ### ... then we can deduce that "B holds" also.
 
-(check-type? [A :type] [B :type]
+(type-check? [A :type] [B :type]
 
    (lambda [f (==> A B)]
      (lambda [x A]
@@ -232,7 +232,7 @@
 ;;; In type theory, the modus ponens naturally generalizes
 ;;; to instantiation of universal quantifiers.
 
-(check-type?
+(type-check?
  [Thing :type] [man (==> Thing :type)] [mortal (==> Thing :type)]
  [socrate Thing]
 
@@ -395,7 +395,7 @@
 
 ;;; Let's slowly remove types in <<<and-intro-|||(lambda (x)t)>>>
 
-(check-type?
+(type-check?
  [A :type] [B :type]
  (lambda [x A]
    (lambda [y B]
@@ -417,7 +417,7 @@
 
 ;;; Let's slowly remove types in <<<and-elim-left-|||(lambda (x)t)>>>
 
-(check-type?
+(type-check?
  [A :type] [B :type]
  (lambda [p (and- A B)]
    ((p A) (lambda [x A]
@@ -490,34 +490,44 @@
 ;;; (lambda [x nat] (or (equal nat x 1) (equal nat x 2) (equal nat x 3)))
 
 
-
+;;; # The rest of set theory
+;;; ### cf. https://github.com/fredokun/latte-sets
 
-;;; # Example 3: Set intersection
+(definition union
+  "s1 ∪ s2"
+  [[T :type] [s1 (set T)] [s2 (set T)]]
+  (lambda [x T]
+    (or (elem T x s1)
+        (elem T x s2))))
 
 (definition intersection
-  "Intersection of sets"
+  "s1 ∩ s2"
   [[T :type] [s1 (set T)] [s2 (set T)]]
   (lambda [x T]
     (and (elem T x s1)
          (elem T x s2))))
 
-(defthm inter-empty ""
-  [[T :type]]
-  (forall [s (set T)]
-    (forall [x T]
-      (not (elem T x (intersection T (empty-set T) s))))))
+(definition difference
+  "s1 ∖ s2"
+  [[T :type] [s1 (set T)] [s2 (set T)]]
+  (lambda [x T]
+    (and (elem T x s1)
+         (not (elem T x s2)))))
 
-(proof inter-empty
-    :script
-  (assume [s (set T)
-           x T]
-    (assume [Hx (elem T x (intersection T (empty-set T) s))]
-      (have <a> p/absurd :by (p/%and-elim-left Hx))
-      (have <b> (not (elem T x (intersection T (empty-set T) s)))
-            :discharge [Hx <a>]))
-    (qed <b>)))
+(definition subset
+  "s1 ⊆ s2"
+  [[T :type] [s1 (set T)] [s2 (set T)]]
+  (forall [x T]
+    (==> (elem T x s1)
+         (elem T x s2))))
 
-;; Exercice: union
+(definition seteq
+  "s1 = s2"
+  [[T :type] [s1 (set T)] [s2 (set T)]]
+  (and (subset T s1 s2)
+       (subset T s2 s1)))
+
+;; etc.
 
 
 
@@ -706,10 +716,7 @@ but this is not in fact important)"
 ;;; ### Mathematics can be fun, (almost) as fun as live-coding in Clojure!
 ;; but ... wait! this *is* live-coding in Clojure!
 
-;;; Formalizing and proving things can be a very addictive <<<puzzle game|||(lambda (x) t)>>>
-;;; - with both a <<<single player|||(lambda (x) t)>>>
-;;;   and <<<multiplayer cooperation|||(lambda (x) t)>>> modes available!
-;; (MMO being considered)
+;;; Formalizing and proving things can be a very addictive <<<puzzle game|||(lambda (x) t)>>> with:
 
 ;;; - An almighty adversary: <<<mathematics|||(lambda(x)t)>>>
 

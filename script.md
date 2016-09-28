@@ -1,23 +1,19 @@
 
-# Slide 1
+# Slide 1: intro
 
 Hello, my name is Frederic Peschanski. I am a professor
 at the university Pierre et Marie Curie in Paris in France.
 
-I am very thankfull for the Clojure technology and community,
- to have taken very seriously the notion of *live-coding*!
-It seems to me, from the eyes of an academic, that live-coding greatly help
-people developing software in the *real* world while still having fun!
+I am a big fan of the talks about live-coding music, graphics or games
+ in Clojure! I find these mind-blowing.
 
-... Live-coding is fun, there's no doubt about that. There
-are examples of live-coding musics and graphics, especially
- in Clojure, that are really mind blowing!
+but what about live-coding less obviously fun... like mathematics!
+Ok, I enjoy doing mathematics, but it can really be boring when you have
+ to write a long proof with pencil and paper, or perhaps even worse using LaTeX...
 
-Many people hate mathematics... I wonder if it is because it's
-boring in essence or if it's more about the way we do mathematics?
-In this talk, we will use a small library called LaTTe for
- a session of live-coding logic and mathematics in Clojure.
-... we'll see if it's fun or not...
+So I will now try to show you how mathematics can be fun.
+For this, I will use a small library, named LaTTe, that makes
+ it possible to do mathematics directly in Clojure.
 
 Timing: 2:30 (total 2:30)
 
@@ -26,13 +22,13 @@ Timing: 2:30 (total 2:30)
 ... just before we begin, I would like to say that I started
 all this after reading a book that I find very interesting.
 
- Type theory and formal proofs by Rob Nederpeldt and Herman
- Geuvers.
+ Type theory and formal proofs: an introduction
+
+ If you are interested in the lambda-calculus, then I really suggest
+reading this book.
 
 Of course, you do not need to read this book to understand my talk
- or even to use LaTTe. But it is still a very interesting reading if
- you want to know more about the lambda-calculus and its deep connection
-  with not just computation but also logic and mathematics.
+ or even to use LaTTe. It is about the theory behind the library.
 
 Timing: 1:00 (total 3:30)
 
@@ -44,6 +40,8 @@ use emacs and cider.
 Timing 0:30 (total 4:00)
 
 # Slide 4
+
+
 
 There is in fact only one prerequisite for this talk: I need you to
 know about the pure lambda-calclus. But of course I am not taking

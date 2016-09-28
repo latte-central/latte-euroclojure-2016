@@ -56,7 +56,7 @@
              :refer [definition defthm defaxiom defnotation
                      forall lambda ==>
                      assume have proof try-proof
-                     term type-of check-type?]]
+                     term type-of type-check?]]
 
   ;; ... the "standard" library (propositions, quantifiers and equality) 
             [latte.prop :as p :refer [<=> and or not]]
@@ -131,7 +131,7 @@
 
 ;;; # Let's do some type-checking ...
 
-(check-type?
+(type-check?
 
  ;; the lambda-term:
  
@@ -146,7 +146,7 @@
 
 ;;; # The type-generic composition function
 
-(check-type?
+(type-check?
 
   ;; the lambda-term:
 
@@ -158,25 +158,10 @@
 
  ;; is of type ...
 
- ✳)
-
-
-
-;;; # The logical view...
-
-;;; Given arbitrary types A, B and C
-
-;;; ### - the type of the identity function on A is:
-
-;;; (forall [A :type]
-;;;   (==> A A))
-
-;;; ###- the type of the composition function on A,B and C is:
-
-;;; (forall [A B C :type]
-;;;   (==> (==> A B)
-;;;        (==> B C)
-;;;        (==> A C)))
+ (forall [A B C :type]
+  (==> (==> A B)
+       (==> B C)
+       (==> A C))))
 
 
 
@@ -190,15 +175,16 @@
 ;;; ### and if it is the case that "A holds"
 ;;; ### ... then we can deduce that "B holds" also.
 
-(check-type? [A :type] [B :type]
+(type-check?
+ [A :type] [B :type]
 
-   ;; find a term ...
-   ✳
-
-   ;; of type
-   
-   (==> (==> A B) A
-        B))
+ ;; find a term ...
+ ✳
+ 
+ ;; of type
+ 
+ (==> (==> A B) A
+      B))
 
 
 
@@ -207,7 +193,7 @@
 ;;; In type theory, the modus ponens naturally generalizes
 ;;; to instantiation of universal quantifiers.
 
-(check-type?
+(type-check?
  [Thing :type] [man (==> Thing :type)] [mortal (==> Thing :type)]
  [socrate Thing]
 
@@ -221,22 +207,6 @@
       ;; thus
       (mortal socrate)))
 
-
-
-
-;;; # Our first (low-level) proof ...
-
-;;; Let's try to prove something about
-;;; the implication and conjunction
-
-(check-type? [A :type] [B :type] [C :type]
-             
-  ✳
-             
-  ;; ^^^ the proof term ^^^
-  
-  (==> (==> A B) (and C A)
-       B))
 
 
 
@@ -271,7 +241,7 @@
 ;;; ## About LaTTe
 ;;; LaTTe is a proof assistant implemented as a Clojure library
 ;;; with top-level forms for axioms, definitions, theorems and proofs.
-;; available on Clojars: <<<[latte "0.3.2-SNAPSHOT"]|||(lambda (x) t)>>>
+;; available on Clojars: <<<[latte "0.3.5-SNAPSHOT"]|||(lambda (x) t)>>>
 
 ;;; ## Notable features
 
@@ -286,7 +256,7 @@
 
 ;;; # Let's do the maths...
 
-;;; ### Our objective (in the few minutes to come):
+;;; ### Our objectives (in the few minutes to come):
 
 ;;; 1) a glimpse of <<<natural deduction|||(lambda (x) t)>>> (logic)
 
@@ -336,22 +306,9 @@
 
 ;;; Then the introduction rule: 
 
-(defthm and-intro- ""
-  [[A :type] [B :type]]
-  (==> A B
-       (and- A B)))
-
-(proof and-intro-
-    :script
-  (assume [x A
-           y B]
-    (assume [C :type
-             f (==> A B C)]
-      (have <a> (==> B C) :by (f x))
-      (have <b> C :by (<a> y))
-      (have <c> (and- A B) :discharge [C f <b>]))
-    (qed <c>)))
-
+;;;      A      B
+;;;   ============== (and-intro)
+;;;      (and A B)
 
 
 
@@ -385,21 +342,15 @@
 
 ;;; Let's slowly remove types in <<<and-intro-|||(lambda (x)t)>>>
 
-(check-type?
+(type-check?
  [A :type] [B :type]
- (lambda [x A]
-   (lambda [y B]
-     (lambda [C :type]
-       (lambda [f (==> A B C)]
-         ((f x) y)))))  ;; and-intro- as a term
+
+ ;; ^^^ and-intro- as a term ^^^
 
  (==> A B (and- A B)))
 
 ;; In Clojure :
-(fn [x]
-  (fn [y]
-    (fn [f]
-      ((f x) y))))
+
 
 
 
@@ -407,17 +358,17 @@
 
 ;;; Let's slowly remove types in <<<and-elim-left-|||(lambda (x)t)>>>
 
-(check-type?
+(type-check?
  [A :type] [B :type]
- (lambda [p (and- A B)]
-   ((p A) (lambda [x A]
-            (lambda [y B]
-              x))))  ;; and-elim-left- as a term
+
+ (λ [p (and- A B)] [[p A] (λ [x A] (λ [y B] x))])
+
+ ;; ^^^ and-elim-left- as a term ^^^
 
  (==> (and- A B) A))
 
 ;; In Clojure
-(fn [p] (p (fn [x] (fn [y] x))))
+
 
 
 
@@ -434,8 +385,6 @@
 (left p)
 (right p)
 
-;; The take ayway: pairs are (typed as) logical conjunctions!
-
 
 
 ;;; # 2) a bit of (typed) Set Theory
@@ -449,65 +398,85 @@
 (definition set
   "The type of a set in type theory"
   [[T :type]]
-  (==> T :type))
+  (==> T :type)) ;; a predicate over T
 
-(definition elem
+;;; ### Set membership
+
+(definition elem   ;; x∈s = (elem T x s)
   "Set membership"
   [[T :type] [x T] [s (set T)]]
   (s x))
 
 ;;; ### Example 1: the empty set of type T
 
-(definition empty-set ""
+(definition emptyset
+  "The empty set for type `T`."
   [[T :type]]
-  (lambda [x T] p/absurd))
+  (lambda [x T] p/absurd)) ;; there is no term of type p/absurd!
 
-;;; ### Example 2: the complement of a set
+
+;;; ### Example 2: the complement of a set of type T
 
 (definition complement ""
   [[T :type] [s (set T)]]
   (lambda [x T]
     (not (elem T x s))))
 
-;; Remark: there is no general definition of complement in ZFC set theory
+;; ### Complement in ZFC set theory?
+
+
+
+;;; # Sets in Clojure
 
 ;;; ### Interestingly ...
+
 ;;; In Clojure a (finite) set is also a predicate!
+
 (#{1 2 3} 2)
+
 (#{1 2 3} 4)
 
 ;; in Latte:
 ;;; (lambda [x nat] (or (equal nat x 1) (equal nat x 2) (equal nat x 3)))
 
-
 
 
-;;; # Example 3: Set intersection
+;;; # The rest of set theory
+;;; ### cf. https://github.com/fredokun/latte-sets
+
+(definition union
+  "s1 ∪ s2"
+  [[T :type] [s1 (set T)] [s2 (set T)]]
+  (lambda [x T]
+    (or (elem T x s1)
+        (elem T x s2))))
 
 (definition intersection
-  "Intersection of sets"
+  "s1 ∩ s2"
   [[T :type] [s1 (set T)] [s2 (set T)]]
   (lambda [x T]
     (and (elem T x s1)
          (elem T x s2))))
 
-(defthm inter-empty ""
-  [[T :type]]
-  (forall [s (set T)]
-    (forall [x T]
-      (not (elem T x (intersection T (empty-set T) s))))))
+(definition difference
+  "s1 ∖ s2"
+  [[T :type] [s1 (set T)] [s2 (set T)]]
+  (lambda [x T]
+    (and (elem T x s1)
+         (not (elem T x s2)))))
 
-(proof inter-empty
-    :script
-  (assume [s (set T)
-           x T]
-    (assume [Hx (elem T x (intersection T (empty-set T) s))]
-      (have <a> p/absurd :by (p/%and-elim-left Hx))
-      (have <b> (not (elem T x (intersection T (empty-set T) s)))
-            :discharge [Hx <a>]))
-    (qed <b>)))
+(definition subset
+  "s1 ⊆ s2"
+  [[T :type] [s1 (set T)] [s2 (set T)]]
+  (forall [x T]
+    (==> (elem T x s1)
+         (elem T x s2))))
 
-;; Exercice: union
+(definition seteq
+  "s1 = s2"
+  [[T :type] [s1 (set T)] [s2 (set T)]]
+  (and (subset T s1 s2)
+       (subset T s2 s1)))
 
 
 
@@ -696,10 +665,7 @@ but this is not in fact important)"
 ;;; ### Mathematics can be fun, (almost) as fun as live-coding in Clojure!
 ;; but ... wait! this *is* live-coding in Clojure!
 
-;;; Formalizing and proving things can be a very addictive <<<puzzle game|||(lambda (x) t)>>>
-;;; - with both a <<<single player|||(lambda (x) t)>>>
-;;;   and <<<multiplayer cooperation|||(lambda (x) t)>>> modes available!
-;; (MMO being considered)
+;;; Formalizing and proving things can be a very addictive <<<puzzle game|||(lambda (x) t)>>> with:
 
 ;;; - An almighty adversary: <<<mathematics|||(lambda(x)t)>>>
 
