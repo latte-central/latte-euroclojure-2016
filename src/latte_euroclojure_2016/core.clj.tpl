@@ -74,9 +74,9 @@
 
 ((fn [x] x) 42)
 
-;;; ### Another example: binary composition
+;;; ### Another example: binary composition: g°f
 
-((((fn [g] (fn [f] (fn [x] (f (g x)))))
+((((fn [f] (fn [g] (fn [x] (g (f x)))))
    even?)                               ;; (==> int boolean)
    (fn [y] (if y "even" "odd")))        ;; (==> boolean String)
  42)
@@ -119,6 +119,7 @@
 ;;; # Types, really?
 
 ;;; ### Example: the (type-generic) identity function
+;; (fn [x] x) in LaTTe
 
 (term (lambda [A :type]
         (lambda [x A] x)))
@@ -145,16 +146,17 @@
 
 
 ;;; # The type-generic composition function
+;; ((fn [f] (fn [g] (fn [x] (g (f x)))))) in LaTTe
 
 (type-check?
 
   ;; the lambda-term:
 
  (lambda [A B C :type]
-   (lambda [g (==> A B)]
-     (lambda [f (==> B C)]
+   (lambda [f (==> A B)]
+     (lambda [g (==> B C)]
        (lambda [x A]
-         (f (g x))))))
+         (g (f x))))))
 
  ;; is of type ...
 

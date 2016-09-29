@@ -74,9 +74,9 @@
 
 ((fn [x] x) 42)
 
-;;; ### Another example: binary composition
+;;; ### Another example: binary composition: g°f
 
-((((fn [g] (fn [f] (fn [x] (f (g x)))))
+((((fn [f] (fn [g] (fn [x] (g (f x)))))
    even?)                               ;; (==> int boolean)
    (fn [y] (if y "even" "odd")))        ;; (==> boolean String)
  42)
@@ -119,6 +119,7 @@
 ;;; # Types, really?
 
 ;;; ### Example: the (type-generic) identity function
+;; (fn [x] x) in LaTTe
 
 (term (lambda [A :type]
         (lambda [x A] x)))
@@ -140,29 +141,29 @@
 
  ;; is of type ...
 
- (forall [A :type]
-   (==> A A)))
+ ✳)
  
 
 
 ;;; # The type-generic composition function
+;; ((fn [f] (fn [g] (fn [x] (g (f x)))))) in LaTTe
 
 (type-check?
 
   ;; the lambda-term:
 
  (lambda [A B C :type]
-   (lambda [g (==> A B)]
-     (lambda [f (==> B C)]
+   (lambda [f (==> A B)]
+     (lambda [g (==> B C)]
        (lambda [x A]
-         (f (g x))))))
+         (g (f x))))))
 
  ;; is of type ...
 
  (forall [A B C :type]
-   (==> (==> A B)
-        (==> B C)
-        (==> A C))))
+  (==> (==> A B)
+       (==> B C)
+       (==> A C))))
 
 
 
@@ -178,11 +179,9 @@
 
 (type-check?
  [A :type] [B :type]
- 
+
  ;; find a term ...
- (lambda [f (==> A B)]
-   (lambda [x A]
-     (f x)))
+ ✳
  
  ;; of type
  
@@ -200,11 +199,7 @@
  [Thing :type] [man (==> Thing :type)] [mortal (==> Thing :type)]
  [socrate Thing]
 
- (lambda [H1 (forall [t Thing]
-               (==> (man t) (mortal t)))]
-   (lambda [H2 (man socrate)]
-     ((H1 socrate) ;; (==> (man socrate) (mortal socrate))
-      H2)))
+ ✳
  
  ;; ^^^ Was Aristotle right? ^^^
  
@@ -255,7 +250,7 @@
 ;;; - any Clojure Development environment can be used to do maths!
 ;; (e.g. I use both Cider and Gorilla Repl, sometimes together via nrepl...)
 
-;;; - it leverages the Clojure (clojars) ecosystem for <<<proving in the large|||t>>>
+;;; - it leverages the Clojure (JVM/Maven) ecosystem for <<<proving in the large|||t>>>
 
 ;;; - it supports a DSL for declarative proof scripts <<<<-- hot!|||t>>>
 
@@ -313,28 +308,10 @@
 
 ;;; Then the introduction rule: 
 
-;;      A      B
-;;   ============== (and-intro)
-;;      (and A B)
+;;;      A      B
+;;;   ============== (and-intro)
+;;;      (and A B)
 
-(defthm and-intro- ;; nameclash
-  [[A :type] [B :type]]
-  (==> A
-       B
-       (and- A B)))
-
-(proof and-intro-
-    :script
-  (assume [x A
-           y B]
-    (assume [C :type
-             f (==> A B C)]
-      (have <a> (==> B C)
-            :by (f x))
-      (have <b> C :by (<a> y))
-      (have <c> (and- A B)
-            :discharge [C f <b>]))
-    (qed <c>)))
 
 
 ;;; # Conjunction in Type Theory (2/2)
@@ -370,13 +347,12 @@
 (type-check?
  [A :type] [B :type]
 
- (λ [x A] (λ [y B] (λ [C ✳] (λ [f (Π [⇧ A] (Π [⇧' B] C))] [[f x] y]))))
  ;; ^^^ and-intro- as a term ^^^
 
  (==> A B (and- A B)))
 
 ;; In Clojure :
-(fn [x] (fn [y] (fn [f] ((f x) y))))
+
 
 
 
@@ -394,7 +370,7 @@
  (==> (and- A B) A))
 
 ;; In Clojure
-(fn [p] (p (fn [x] (fn [y] x))))
+
 
 
 
@@ -410,7 +386,6 @@
 (def p ((mk-and "hello") 42))
 (left p)
 (right p)
-
 
 
 
@@ -505,8 +480,6 @@
   (and (subset T s1 s2)
        (subset T s2 s1)))
 
-;; etc.
-
 
 
 ;;; # 3) A peek at equality
@@ -546,7 +519,9 @@
 
 ;; (proof is non-trivial, cf. <<<latte.equal/eq-cong|||(lambda(x)t)>>>)
 
-;;; ### in Clojure ?
+;;; ### Clojure counter-example
+;; (but there's one for any programming language
+;; except for pointer equality)
 
 (= [1 2 3 4] (range 1 5))
 
@@ -597,7 +572,7 @@
   (==> (P zero)
        (forall [k nat]
          (==> (P k) (P (succ k))))
-       (forall [n nat] (P n)))) ;; cf. fixed-points
+       (forall [n nat] (P n))))
            
 
 
@@ -692,7 +667,8 @@ but this is not in fact important)"
 ;;; ### Mathematics can be fun, (almost) as fun as live-coding in Clojure!
 ;; but ... wait! this *is* live-coding in Clojure!
 
-;;; Formalizing and proving things can be a very addictive <<<puzzle game|||(lambda (x) t)>>>
+;;; Formalizing and proving things can be a very addictive <<<puzzle game|||(lambda (x) t)>>> with:
+
 ;;; - An almighty adversary: <<<mathematics|||(lambda(x)t)>>>
 
 ;;; - An <<<unlimited|||(lambda(x)t)>>> number of puzzles:
