@@ -119,13 +119,14 @@
 ;;; # Types, really?
 
 ;;; ### Example: the (type-generic) identity function
-;; (fn [x] x) in LaTTe
 
-(term (lambda [A :type]
-        (lambda [x A] x)))
+(term
+ ✳
+ ;; ^^^ (fn [x] x) in LaTTe ^^^
+ )
 
-;; e.g.:  (((lambda [A :type] (lambda [x A] x)) 42) int)
-;;        --> ((lambda [x int] x) 42)
+;; e.g.:
+;;        --> ((fn [x] x) 42)
 ;;        --> 42
 
 
@@ -135,14 +136,14 @@
 (type-check?
 
  ;; the lambda-term:
- 
+
  (lambda [A :type]
    (lambda [x A] x))
 
  ;; is of type ...
 
  ✳)
- 
+
 
 
 ;;; # The type-generic composition function
@@ -219,9 +220,9 @@
 ;;; ... that thanks to the Curry-Howard correspondence
 ;;; a lambda-calculus with types may be used to:
 
-;;;   1) express logical propositions as types
+;;;   1) express logical <<<propositions as types|||(lambda(x)t)>>>
 
-;;;   2) formalise proofs of the propositions as terms carrying those types
+;;;   2) formalize <<<proofs as terms|||(lambda(x)t)>>> carrying those types
 
 ;;; ## However ...
 
@@ -370,6 +371,7 @@
  (==> (and- A B) A))
 
 ;; In Clojure
+(fn [p] (p (fn [x] (fn [y] x))))
 
 
 
@@ -416,7 +418,6 @@
   [[T :type]]
   (lambda [x T] p/absurd)) ;; there is no term of type p/absurd!
 
-
 ;;; ### Example 2: the complement of a set of type T
 
 (definition complement ""
@@ -424,7 +425,9 @@
   (lambda [x T]
     (not (elem T x s))))
 
-;; ### Complement in ZFC set theory?
+;;; ### Complement in classical set theory:
+;;; ∁(A) = { x ∈ U | x ∉ A }.
+;; but what is the "universe" U?
 
 
 
@@ -573,7 +576,7 @@
        (forall [k nat]
          (==> (P k) (P (succ k))))
        (forall [n nat] (P n))))
-           
+
 
 
 ;;; # A proof by induction
@@ -676,7 +679,7 @@ but this is not in fact important)"
 ;;;    * starters: propositional logic, basic quantifiers, etc.
 
 ;;;    * serious challenges: numbers, inductive types, recursive functions, etc.
-;;    (way more captivating than Sudoku and even kakuro)
+;;    (let's reinvent the *better* wheel...)
 
 ;;;    * professional-grade puzzles: modern mathematics
 ;; (new puzzles invented everyday...)
@@ -686,10 +689,10 @@ but this is not in fact important)"
 ;;; # ... and what about a real challenge?
 
 (defthm one-million-dollar-baby
-  "" [[Algos :type] [P (set Algos)] [NP (set Algos)]]
-  (not (equal Algos P NP))) ;; or is-it?
+  "" [[Problem :type] [P (set Problem)] [NP (set Problem)]]
+  (not (equal Problem P NP))) ;; or is-it?
 
-(proof life-universe-rest
+(proof one-million-dollar-baby
     :script
   "TODO")
 
