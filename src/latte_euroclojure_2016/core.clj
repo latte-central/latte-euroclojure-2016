@@ -313,29 +313,42 @@
 ;;;   ============== (and-intro)
 ;;;      (and A B)
 
+(defthm and-intro- ""
+  [[A :type] [B :type]]
+  (==> A B
+       (and- A B)))
+
+(proof and-intro-
+       :script
+       (assume [x A
+                y B]
+         (assume [C :type
+                  f (==> A B C)]
+            (have <a> (==> B C) :by (f x))
+            (have <b> C :by (<a> y))
+            (have <c> (forall [C :type]
+                         (==> (==> A B C)
+                              C))
+                  :discharge [C f <b>]))
+         (qed <c>)))
+
 
 
 ;;; # Conjunction in Type Theory (2/2)
 
 ;;; Finally the elimination rules
 
+;;;     (and A B)                         (and A B)
+;;;  ============== (and-elim-left)    ============== (and-elim-right)
+;;;        A                                 B
+
 (defthm and-elim-left- ""
   [[A :type] [B :type]]
-  (==> (and- A B)
-       A))
+   ✳)
 
 (proof and-elim-left-
     :script
-  (assume [p (and- A B)]
-    (have <a> (==> (==> A B A) A)
-          :by (p A))
-    (assume [x A
-             y B]
-      (have <b> A :by x)
-      (have <c> (==> A B A)
-            :discharge [x y <b>]))
-    (have <d> A :by (<a> <c>))
-    (qed <d>)))
+  "todo")
 
 ;; exercice : and-elim-right-  (solution? p/and-elim-right)
 
@@ -437,12 +450,12 @@
 
 ;;; In Clojure a (finite) set is also a predicate!
 
-(#{1 2 3} 2)
+(#{1 2 4} 2)
 
-(#{1 2 3} 4)
+(#{1 2 4} 5)
 
 ;; in Latte:
-;;; (lambda [x nat] (or (equal nat x 1) (equal nat x 2) (equal nat x 3)))
+;;; (lambda [x nat] (or (equal nat x 1) (equal nat x 2) (equal nat x 4)))
 
 
 
@@ -679,7 +692,7 @@ but this is not in fact important)"
 ;;;    * starters: propositional logic, basic quantifiers, etc.
 
 ;;;    * serious challenges: numbers, inductive types, recursive functions, etc.
-;;    (let's reinvent the *better* wheel...)
+;;    (way more captivating than Sudoku and even kakuro)
 
 ;;;    * professional-grade puzzles: modern mathematics
 ;; (new puzzles invented everyday...)
