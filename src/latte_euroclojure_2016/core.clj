@@ -306,7 +306,7 @@
 (definition and-  ;; nameclash!
   "Conjunction in Type Theory"
   [[A :type] [B :type]]
-  (forall [C :type]
+  (∀ [C :type]
     (==> (==> A B C)
          C)))
 
@@ -349,7 +349,7 @@
   [[A :type] [B :type]]
    ✳)
 
-(proof and-elim-left-
+(try-proof and-elim-left-
     :script
   "todo")
 
@@ -395,13 +395,13 @@
 ;;; # Conjunction as computation (in Clojure)
 
 ;; We have:
-(def mk-and (fn [x] (fn [y] (fn [f] ((f x) y)))))
+(def intro (fn [x] (fn [y] (fn [f] ((f x) y)))))
 (def left (fn [p] (p (fn [x] (fn [y] x)))))
 (def right (fn [p] (p (fn [x] (fn [y] y)))))
 
 ;; Have these functions any computational meaning?
 
-(def p ((mk-and "hello") 42))
+(def p ((intro "hello") 42))
 (left p)
 (right p)
 

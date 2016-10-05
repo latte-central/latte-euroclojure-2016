@@ -25,12 +25,17 @@
 
 ;;; # To give credit where credit is due ...
 
+
 ;;; The theory underlying LaTTe (as well as its basic library)
 ;;; is heavily influenced by the following book:
+
+
 
 ;;; ## Type Theory and Formal Proof: an Introduction
 ;;; ### Rob Nederpelt and Herman Geuvers
 ;; Cambridge University Press, 2012
+
+
 
 ;;;               __...--~~~~~-._   _.-~~~~~--...__
 ;;;             //               `V'               \\ 
@@ -40,18 +45,11 @@
 ;;;         ====================\\|//====================
 ;;;                         dwb `---`  
 
-;;; It is a wonderful book for (the very few ?) people interested
-;;; in such topics
-
-;; (of course, you do *not* need to read the book to
-;; use LaTTe, or hopefully to understand this talk!).
-
-
 
 
 ;;; # Let's get started ...
 
-(ns latte-euroclojure-2016.full
+(ns latte-euroclojure-2016.core
   "This is a talk about LaTTe given @ Euroclojure 2016."
 
   ;; These belong to logic and mathematics ;-)
@@ -80,12 +78,9 @@
 
 ((fn [x] x) 42)
 
-;; what just happened is called a <<<beta-reduction|||t>>>
-;; (a greek-ish translation for <<<function application|||t>>>)
+;;; ### Another example: binary composition: g°f
 
-;;; ### Another example: binary composition
-
-((((fn [g] (fn [f] (fn [x] (f (g x)))))
+((((fn [f] (fn [g] (fn [x] (g (f x)))))
    even?)                               ;; (==> int boolean)
    (fn [y] (if y "even" "odd")))        ;; (==> boolean String)
  42)
@@ -127,78 +122,55 @@
 
 ;;; # Types, really?
 
-;;; Yes! in LaTTe the 'lambda' abstractions are
-;;; explicitely typed...
-
 ;;; ### Example: the (type-generic) identity function
 
-(term (lambda [A :type]
-        (lambda [x A] x)))
+(term
+ (λ [A :type] (λ [x A] x))
+ ;; ^^^ (fn [x] x) in LaTTe ^^^
+ )
 
-;; ^^^ look ma! a System F-ish term depending on a type! ^^^
-
-;; e.g.:  (((lambda [A :type] (lambda [x A] x)) 42) int)
-;;        --> ((lambda [x int] x) 42)
+;; e.g.:  (((λ [A :type] (λ [x A] x)) int) 42)
+;;        ((λ [x int] x) 42)
 ;;        --> 42
 
 
 
 ;;; # Let's do some type-checking ...
 
-;;; ##What is the type of the (type-generic) identity?
-
 (type-check?
- (lambda [A :type]
-   (lambda [x A] x))
+
+ ;; the lambda-term:
+
+ (λ [A :type]
+   (λ [x A] x))
 
  ;; is of type ...
 
- (forall [A :type]
-   (==> A A)))
-
-;; or (forall [A :type]
-;;      (forall [x A] A))
+ (∀ [A :type]
+  (==> A A))) ;; equivalently (∀ [A :type] (∀ [x A] A))
+              ;; because x does not occur in body of quantifier
 
 
 
 ;;; # The type-generic composition function
+;; ((fn [f] (fn [g] (fn [x] (g (f x)))))) in LaTTe
 
 (type-check?
- (lambda [A B C :type]
-   (lambda [g (==> A B)]
-     (lambda [f (==> B C)]
-       (lambda [x A]
-         (f (g x))))))
 
-  ;; ... of type
+  ;; the lambda-term:
 
- (forall [A B C :type]
-   (==> (==> A B) (==> B C)
-        (==> A C))))
+ (λ [A B C :type]
+   (λ [f (==> A B)]
+     (λ [g (==> B C)]
+       (λ [x A]
+         (g (f x))))))
 
-
+ ;; is of type ...
 
-;;; # The logical view...
-
-;;; Given arbitrary types A, B and C
-
-;;; ### - the type of the identity function on A is:
-
-;;; (forall [A :type]
-;;;   (==> A A))
-;; "A implies A"  (reflexivity of implication)
-
-;;; ###- the type of the composition function on A,B and C is:
-
-;;; (forall [A B C :type]
-;;;   (==> (==> A B)
-;;;        (==> B C)
-;;;        (==> A C)))
-;; if "A implies B" and "B implies C" then "A implies C"
-;; (transitivity of implication)
-
-;;; ==> we've just experienced <<<Proposition-as-Type|||t>>> (PaT)
-;;;     part of the <<<Curry-Howard correspondance|||t>>>
+ (∀ [A B C :type]
+  (==> (==> A B)
+       (==> B C)
+       (==> A C))))
 
 
 
@@ -212,18 +184,18 @@
 ;;; ### and if it is the case that "A holds"
 ;;; ### ... then we can deduce that "B holds" also.
 
-(type-check? [A :type] [B :type]
+(type-check?
+ [A :type] [B :type]
 
-   (lambda [f (==> A B)]
-     (lambda [x A]
+ ;; find a term ...
+ (λ [f (==> A B)]
+    (λ [x A]
        (f x)))
-
-   ;; of type
-   
-   (==> (==> A B) A
-        B))
-
-;; Modus ponens is beta-reduction (function application) it is that simple!
+ 
+ ;; of type
+ 
+ (==> (==> A B) A
+      B))
 
 
 
@@ -236,13 +208,15 @@
  [Thing :type] [man (==> Thing :type)] [mortal (==> Thing :type)]
  [socrate Thing]
 
- (lambda [H1 (forall [t Thing] (==> (man t) (mortal t)))]
-   (lambda [H2 (man socrate)]
-     ((H1 socrate) H2)))
+ (λ [H1 (∀ [t Thing]
+         (==> (man t) (mortal t)))]
+    (λ [H2 (man socrate)]
+       ((H1 socrate) ;; (==> (man socrate) (mortal socrate))
+        H2)))
  
- ;; Was Aristotle right?
+ ;; ^^^ Was Aristotle right? ^^^
  
- (==> (forall [t Thing]
+ (==> (∀ [t Thing]
         (==> (man t) (mortal t)))
       (man socrate)
       ;; thus
@@ -257,9 +231,9 @@
 ;;; ... that thanks to the Curry-Howard correspondence
 ;;; a lambda-calculus with types may be used to:
 
-;;;   1) express logical propositions as types
+;;;   1) express logical <<<propositions as types|||(lambda(x)t)>>>
 
-;;;   2) formalise proofs of the propositions as terms carrying those types
+;;;   2) formalize <<<proofs as terms|||(lambda(x)t)>>> carrying those types
 
 ;;; ## However ...
 
@@ -281,22 +255,22 @@
 ;;; ## About LaTTe
 ;;; LaTTe is a proof assistant implemented as a Clojure library
 ;;; with top-level forms for axioms, definitions, theorems and proofs.
-;; available on Clojars: <<<[latte "0.3.3-SNAPSHOT"]|||(lambda (x) t)>>>
+;; available on Clojars: <<<[latte "0.3.5-SNAPSHOT"]|||(lambda (x) t)>>>
 
 ;;; ## Notable features
 
 ;;; - any Clojure Development environment can be used to do maths!
 ;; (e.g. I use both Cider and Gorilla Repl, sometimes together via nrepl...)
 
-;;; - it leverages the Clojure (JVM/Maven) ecosystem for <<<proving in the large|||(lambda(x)t)>>>
+;;; - it leverages the Clojure (JVM/Maven) ecosystem for <<<proving in the large|||t>>>
 
-;;; - it supports a DSL for declarative proof scripts <<<<-- hot!|||(lambda(x)t)>>>
+;;; - it supports a DSL for declarative proof scripts <<<<-- hot!|||t>>>
 
 
 
 ;;; # Let's do the maths...
 
-;;; ### Our objective (in the few minutes to come):
+;;; ### Our objectives (in the few minutes to come):
 
 ;;; 1) a glimpse of <<<natural deduction|||(lambda (x) t)>>> (logic)
 
@@ -340,11 +314,15 @@
 (definition and-  ;; nameclash!
   "Conjunction in Type Theory"
   [[A :type] [B :type]]
-  (forall [C :type]
+  (∀ [C :type]
     (==> (==> A B C)
          C)))
 
 ;;; Then the introduction rule: 
+
+;;;      A      B
+;;;   ============== (and-intro)
+;;;      (and A B)
 
 (defthm and-intro- ""
   [[A :type] [B :type]]
@@ -352,22 +330,28 @@
        (and- A B)))
 
 (proof and-intro-
-    :script
-  (assume [x A
-           y B]
-    (assume [C :type
-             f (==> A B C)]
-      (have <a> (==> B C) :by (f x))
-      (have <b> C :by (<a> y))
-      (have <c> (and- A B) :discharge [C f <b>]))
-    (qed <c>)))
-
+       :script
+       (assume [x A
+                y B]
+         (assume [C :type
+                  f (==> A B C)]  ;; same as (==> A (==> B C))
+            (have <a> (==> B C) :by (f x))
+            (have <b> C :by (<a> y))
+            (have <c> (forall [C :type]   ;; same as (and- A B)
+                         (==> (==> A B C)
+                              C))
+                  :discharge [C f <b>])) ;; yields (λ [C :type] (λ [f (==> A B C)] <b>))
+         (qed <c>)))
 
 
 
 ;;; # Conjunction in Type Theory (2/2)
 
 ;;; Finally the elimination rules
+
+;;;     (and A B)                         (and A B)
+;;;  ============== (and-elim-left)    ============== (and-elim-right)
+;;;        A                                 B
 
 (defthm and-elim-left- ""
   [[A :type] [B :type]]
@@ -376,16 +360,16 @@
 
 (proof and-elim-left-
     :script
-  (assume [p (and- A B)]
+  (assume [H (and- A B)] ;; i.e. (∀ [C :type] (==> (==> A B C) C))
     (have <a> (==> (==> A B A) A)
-          :by (p A))
+          :by (H A))
     (assume [x A
              y B]
       (have <b> A :by x)
       (have <c> (==> A B A)
-            :discharge [x y <b>]))
-    (have <d> A :by (<a> <c>))
-    (qed <d>)))
+            :discharge [x y <b>])) ;; yields: (λ [x A] (λ [y B] <b>))
+    (have <e> A :by (<a> <c>))
+    (qed <e>)))
 
 ;; exercice : and-elim-right-  (solution? p/and-elim-right)
 
@@ -397,19 +381,15 @@
 
 (type-check?
  [A :type] [B :type]
- (lambda [x A]
-   (lambda [y B]
-     (lambda [C :type]
-       (lambda [f (==> A B C)]
-         ((f x) y)))))  ;; and-intro- as a term
+
+ (λ [x A] (λ [y B] (λ [C ✳] (λ [f (Π [⇧ A] (Π [⇧' B] C))] [[f x] y]))))
+ ;; ^^^ and-intro- as a term ^^^
 
  (==> A B (and- A B)))
 
 ;; In Clojure :
-(fn [x]
-  (fn [y]
-    (fn [f]
-      ((f x) y))))
+(fn [x] (fn [y] (fn [f] ((f x) y))))
+
 
 
 
@@ -419,32 +399,31 @@
 
 (type-check?
  [A :type] [B :type]
- (lambda [p (and- A B)]
-   ((p A) (lambda [x A]
-            (lambda [y B]
-              x))))  ;; and-elim-left- as a term
+
+ (λ [p (and- A B)] [[p A] (λ [x A] (λ [y B] x))])
+
+ ;; ^^^ and-elim-left- as a term ^^^
 
  (==> (and- A B) A))
 
 ;; In Clojure
 (fn [p] (p (fn [x] (fn [y] x))))
 
+
 
 
 ;;; # Conjunction as computation (in Clojure)
 
 ;; We have:
-(def mk-and (fn [x] (fn [y] (fn [f] ((f x) y)))))
+(def intro (fn [x] (fn [y] (fn [f] ((f x) y)))))
 (def left (fn [p] (p (fn [x] (fn [y] x)))))
 (def right (fn [p] (p (fn [x] (fn [y] y)))))
 
 ;; Have these functions any computational meaning?
 
-(def p ((mk-and "hello") 42))
+(def p ((intro "hello") 42))
 (left p)
 (right p)
-
-;; The take ayway: pairs are (typed as) logical conjunctions!
 
 
 
@@ -459,75 +438,49 @@
 (definition set
   "The type of a set in type theory"
   [[T :type]]
-  (==> T :type))
+  (==> T :type)) ;; a predicate over T
 
-(definition elem
+;;; ### Set membership
+
+(definition elem   ;; x∈s = (elem T x s)
   "Set membership"
   [[T :type] [x T] [s (set T)]]
   (s x))
 
-;;; ### Example 1: the empty set of type T
-
-(definition empty-set ""
-  [[T :type]]
-  (lambda [x T] p/absurd))
-
-;;; ### Example 2: the complement of a set
-
-(definition complement ""
-  [[T :type] [s (set T)]]
-  (lambda [x T]
-    (not (elem T x s))))
-
-;; Remark: there is no general definition of complement in ZFC set theory
-
-;;; ### Interestingly ...
-;;; In Clojure a (finite) set is also a predicate!
-(#{1 2 3} 2)
-(#{1 2 3} 4)
-
-;; in Latte:
-;;; (lambda [x nat] (or (equal nat x 1) (equal nat x 2) (equal nat x 3)))
-
-
-;;; # The rest of set theory
-;;; ### cf. https://github.com/fredokun/latte-sets
-
-(definition union
-  "s1 ∪ s2"
-  [[T :type] [s1 (set T)] [s2 (set T)]]
-  (lambda [x T]
-    (or (elem T x s1)
-        (elem T x s2))))
+;;; ### Example 1: intersection
 
 (definition intersection
   "s1 ∩ s2"
   [[T :type] [s1 (set T)] [s2 (set T)]]
-  (lambda [x T]
+  (λ [x T]
     (and (elem T x s1)
          (elem T x s2))))
 
-(definition difference
-  "s1 ∖ s2"
-  [[T :type] [s1 (set T)] [s2 (set T)]]
-  (lambda [x T]
-    (and (elem T x s1)
-         (not (elem T x s2)))))
+;;; ### Example 2: the complement of a set of type T
 
-(definition subset
-  "s1 ⊆ s2"
-  [[T :type] [s1 (set T)] [s2 (set T)]]
-  (forall [x T]
-    (==> (elem T x s1)
-         (elem T x s2))))
+(definition complement ""
+  [[T :type] [s (set T)]]
+  (λ [x T]
+    (not (elem T x s))))
 
-(definition seteq
-  "s1 = s2"
-  [[T :type] [s1 (set T)] [s2 (set T)]]
-  (and (subset T s1 s2)
-       (subset T s2 s1)))
+;;; ### Complement in classical set theory:
+;;; ∁(A) = { x ∈ U | x ∉ A }.
+;; but what is the "universe" U?
 
-;; etc.
+
+
+;;; # Sets in Clojure
+
+;;; ### Interestingly ...
+
+;;; In Clojure a (finite) set is also a predicate!
+
+(#{1 2 4} 2)
+
+(#{1 2 4} 5)
+
+;; in Latte:
+;;; (λ [x nat] (or (equal nat x 1) (equal nat x 2) (equal nat x 4)))
 
 
 
@@ -555,7 +508,7 @@
 (definition equal- ;; nameclash
   "Mr. Leibniz says..."
   [[T :type] [x T] [y T]]
-  (forall [P (==> T :type)]
+  (∀ [P (==> T :type)]
     (<=> (P x) (P y))))
 
 ;; As a consequence:
@@ -605,7 +558,7 @@
 (defaxiom nat-succ-not-surj
   "The first Peano axiom: there is no successor in ℕ that equals 0"
   []
-  (forall [n nat]
+  (∀ [n nat]
     (not (equal nat (succ n) zero))))
 
 (defaxiom nat-succ-inj
@@ -622,7 +575,7 @@
        (forall [k nat]
          (==> (P k) (P (succ k))))
        (forall [n nat] (P n))))
-           
+
 
 
 ;;; # A proof by induction
@@ -735,10 +688,10 @@ but this is not in fact important)"
 ;;; # ... and what about a real challenge?
 
 (defthm one-million-dollar-baby
-  "" [[Algos :type] [P (set Algos)] [NP (set Algos)]]
-  (not (equal Algos P NP))) ;; or is-it?
+  "" [[Problem :type] [P (set Problem)] [NP (set Problem)]]
+  (not (equal Problem P NP))) ;; or is-it?
 
-(proof life-universe-rest
+(proof one-million-dollar-baby
     :script
   "TODO")
 
