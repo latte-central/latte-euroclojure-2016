@@ -161,7 +161,9 @@
 (ido-mode 1)
 
 ;; abbrevs
-(setq abbrev-file-name             ;; tell emacs where to read
-      "./config/abbrev_defs")    ;; definitions from...
-
 (add-hook 'clojure-mode-hook (lambda () (abbrev-mode 1)))
+
+(setq abbrev-file-name             ;; tell emacs where to read
+      "abbrev_defs")    ;; definitions from...
+
+(quietly-read-abbrev-file)       ;; reads the abbreviations file

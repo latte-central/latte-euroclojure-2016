@@ -29,9 +29,11 @@
 ;;; The theory underlying LaTTe (as well as its basic library)
 ;;; is heavily influenced by the following book:
 
+
 ;;; ## Type Theory and Formal Proof: an Introduction
 ;;; ### Rob Nederpelt and Herman Geuvers
 ;; Cambridge University Press, 2012
+
 
 ;;;               __...--~~~~~-._   _.-~~~~~--...__
 ;;;             //               `V'               \\ 
@@ -121,12 +123,12 @@
 ;;; ### Example: the (type-generic) identity function
 
 (term
- ✳
+ (λ [A :type] (λ [x A] x))
  ;; ^^^ (fn [x] x) in LaTTe ^^^
  )
 
-;; e.g.:
-;;        --> ((fn [x] x) 42)
+;; e.g.: (((λ [A :type] (λ [x A] x)) 42) int)
+;;        --> ((λ [x int] x) 42)
 ;;        --> 42
 
 
@@ -137,14 +139,15 @@
 
  ;; the lambda-term:
 
- (lambda [A :type]
-   (lambda [x A] x))
+ (λ [A :type]
+   (λ [x A] x))
 
  ;; is of type ...
 
- ✳)
+ (∀ [A :type]
+  (==> A A))
 
-
+ )
 
 ;;; # The type-generic composition function
 ;; ((fn [f] (fn [g] (fn [x] (g (f x)))))) in LaTTe
