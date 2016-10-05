@@ -76,7 +76,7 @@
 (global-set-key (kbd "C-+") 'text-scale-increase)
 
 (global-set-key (kbd "C-&") 'live-clojure-talks-mode)
-(global-set-key (kbd "C-œ") 'smartparens-strict-mode)
+(global-set-key (kbd "C-²") 'smartparens-strict-mode)
 
 (global-set-key (kbd "C-z") 'undo)
 

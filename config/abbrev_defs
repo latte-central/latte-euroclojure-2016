@@ -6,6 +6,7 @@
 (define-abbrev-table 'clojure-mode-abbrev-table
   '(
     ("lambda" "λ" nil 0)
+    ("forall" "∀" nil 0)
    ))
 
 (define-abbrev-table 'clojurec-mode-abbrev-table '())

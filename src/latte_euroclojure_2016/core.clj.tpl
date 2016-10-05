@@ -165,7 +165,7 @@
 
  ;; is of type ...
 
- (forall [A B C :type]
+ (∀ [A B C :type]
   (==> (==> A B)
        (==> B C)
        (==> A C))))
@@ -208,12 +208,11 @@
  
  ;; ^^^ Was Aristotle right? ^^^
  
- (==> (forall [t Thing]
+ (==> (∀ [t Thing]
         (==> (man t) (mortal t)))
       (man socrate)
       ;; thus
       (mortal socrate)))
-
 
 
 
