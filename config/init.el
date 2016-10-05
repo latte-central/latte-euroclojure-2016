@@ -159,3 +159,9 @@
 (setq ido-enable-flex-matching t)
 (setq ido-everywhere t)
 (ido-mode 1)
+
+;; abbrevs
+(setq abbrev-file-name             ;; tell emacs where to read
+      "./config/abbrev_defs")    ;; definitions from...
+
+(add-hook 'clojure-mode-hook (lambda () (abbrev-mode 1)))

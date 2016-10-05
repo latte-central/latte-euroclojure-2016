@@ -153,10 +153,10 @@
 
   ;; the lambda-term:
 
- (lambda [A B C :type]
-   (lambda [f (==> A B)]
-     (lambda [g (==> B C)]
-       (lambda [x A]
+ (λ [A B C :type]
+   (λ [f (==> A B)]
+     (λ [g (==> B C)]
+       (λ [x A]
          (g (f x))))))
 
  ;; is of type ...
@@ -424,18 +424,20 @@
   [[T :type] [x T] [s (set T)]]
   (s x))
 
-;;; ### Example 1: the empty set of type T
+;;; ### Example 1: intersection
 
-(definition emptyset
-  "The empty set for type `T`."
-  [[T :type]]
-  (lambda [x T] p/absurd)) ;; there is no term of type p/absurd!
+(definition intersection
+  "s1 ∩ s2"
+  [[T :type] [s1 (set T)] [s2 (set T)]]
+  (λ [x T]
+    (and (elem T x s1)
+         (elem T x s2))))
 
 ;;; ### Example 2: the complement of a set of type T
 
 (definition complement ""
   [[T :type] [s (set T)]]
-  (lambda [x T]
+  (λ [x T]
     (not (elem T x s))))
 
 ;;; ### Complement in classical set theory:
@@ -455,46 +457,7 @@
 (#{1 2 4} 5)
 
 ;; in Latte:
-;;; (lambda [x nat] (or (equal nat x 1) (equal nat x 2) (equal nat x 4)))
-
-
-
-;;; # The rest of set theory
-;;; ### cf. https://github.com/fredokun/latte-sets
-
-(definition union
-  "s1 ∪ s2"
-  [[T :type] [s1 (set T)] [s2 (set T)]]
-  (lambda [x T]
-    (or (elem T x s1)
-        (elem T x s2))))
-
-(definition intersection
-  "s1 ∩ s2"
-  [[T :type] [s1 (set T)] [s2 (set T)]]
-  (lambda [x T]
-    (and (elem T x s1)
-         (elem T x s2))))
-
-(definition difference
-  "s1 ∖ s2"
-  [[T :type] [s1 (set T)] [s2 (set T)]]
-  (lambda [x T]
-    (and (elem T x s1)
-         (not (elem T x s2)))))
-
-(definition subset
-  "s1 ⊆ s2"
-  [[T :type] [s1 (set T)] [s2 (set T)]]
-  (forall [x T]
-    (==> (elem T x s1)
-         (elem T x s2))))
-
-(definition seteq
-  "s1 = s2"
-  [[T :type] [s1 (set T)] [s2 (set T)]]
-  (and (subset T s1 s2)
-       (subset T s2 s1)))
+;;; (λ [x nat] (or (equal nat x 1) (equal nat x 2) (equal nat x 4)))
 
 
 
