@@ -122,16 +122,16 @@
 
 ;;; # Types, really?
 
+
 ;;; ### Example: the (type-generic) identity function
 
-(term
- ✳
- ;; ^^^ (fn [x] x) in LaTTe ^^^
- )
 
-;; e.g.:  ((fn [x] x) 42)
-;;        
-;;        --> 42
+(term
+  ✳
+  ;; ^^^ (fn [x] x) in LaTTe ^^^
+)
+
+
 
 
 
