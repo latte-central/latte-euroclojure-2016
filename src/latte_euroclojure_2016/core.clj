@@ -15,11 +15,8 @@
 
 ;;; ### Frédéric Peschanski @ Euroclojure 2016
 
-;;; Associate Professor at UPMC
-;; (Université Pierre & Marie Curie, Paris - France)
-
-;;; Researcher at LIP6
-;; (Computer science laboratory)
+;;;  LIP6 (Computer science laboratory)
+;;;  UPMC (University Pierre & Marie Curie, Paris - France)
 
 
 
