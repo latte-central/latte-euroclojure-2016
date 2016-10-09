@@ -15,11 +15,8 @@
 
 ;;; ### Frédéric Peschanski @ Euroclojure 2016
 
-;;; Associate Professor at UPMC
-;; (Université Pierre & Marie Curie, Paris - France)
-
-;;; Researcher at LIP6
-;; (Computer science laboratory)
+;;;  LIP6 (Computer science laboratory)
+;;;  UPMC (University Pierre & Marie Curie, Paris - France)
 
 
 
@@ -30,11 +27,9 @@
 ;;; is heavily influenced by the following book:
 
 
-
 ;;; ## Type Theory and Formal Proof: an Introduction
 ;;; ### Rob Nederpelt and Herman Geuvers
 ;; Cambridge University Press, 2012
-
 
 
 ;;;               __...--~~~~~-._   _.-~~~~~--...__
@@ -122,16 +117,16 @@
 
 ;;; # Types, really?
 
+
 ;;; ### Example: the (type-generic) identity function
+
 
 (term
  (λ [A :type] (λ [x A] x))
- ;; ^^^ (fn [x] x) in LaTTe ^^^
- )
+  ;; ^^^ (fn [x] x) in LaTTe ^^^
+)
 
-;; e.g.:  (((λ [A :type] (λ [x A] x)) int) 42)
-;;        ((λ [x int] x) 42)
-;;        --> 42
+
 
 
 
@@ -147,8 +142,7 @@
  ;; is of type ...
 
  (∀ [A :type]
-  (==> A A))) ;; equivalently (∀ [A :type] (∀ [x A] A))
-              ;; because x does not occur in body of quantifier
+  (==> A A)))
 
 
 
@@ -206,21 +200,21 @@
 
 (type-check?
  [Thing :type] [man (==> Thing :type)] [mortal (==> Thing :type)]
- [socrate Thing]
+ [socrates Thing]
 
  (λ [H1 (∀ [t Thing]
          (==> (man t) (mortal t)))]
-    (λ [H2 (man socrate)]
-       ((H1 socrate) ;; (==> (man socrate) (mortal socrate))
+    (λ [H2 (man socrates)]
+       ((H1 socrates) ;; (==> (man socrates) (mortal socrates))
         H2)))
  
  ;; ^^^ Was Aristotle right? ^^^
  
  (==> (∀ [t Thing]
         (==> (man t) (mortal t)))
-      (man socrate)
+      (man socrates)
       ;; thus
-      (mortal socrate)))
+      (mortal socrates)))
 
 
 
@@ -274,12 +268,10 @@
 
 ;;; 1) a glimpse of <<<natural deduction|||(lambda (x) t)>>> (logic)
 
-;;; 2) a bit of (typed) <<<set theory|||(lambda (x) t)>>>
+;;; 2) a peek at <<<equality|||(lambda (x) t)>>> (according to Mr.Leibniz)
 
-;;; 3) a peek at <<<equality|||(lambda (x) t)>>> (according to Mr.Leibniz)
+;;; 3) take a dip in "real" <<<mathematics|||(lambda (x) t)>>>
 
-;;; 4) a squint into <<<Peano arithmetics|||(lambda (x) t)>>>
-;; (if time permits, but time won't !)
 
 
 
@@ -334,13 +326,13 @@
        (assume [x A
                 y B]
          (assume [C :type
-                  f (==> A B C)]  ;; same as (==> A (==> B C))
+                  f (==> A (==> B C))]
             (have <a> (==> B C) :by (f x))
             (have <b> C :by (<a> y))
-            (have <c> (forall [C :type]   ;; same as (and- A B)
+            (have <c> (forall [C :type]
                          (==> (==> A B C)
                               C))
-                  :discharge [C f <b>])) ;; yields (λ [C :type] (λ [f (==> A B C)] <b>))
+                  :discharge [C f <b>])) ;; (λ [C :type] (λ [f (==> A B C)] <b>))
          (qed <c>)))
 
 
@@ -360,16 +352,14 @@
 
 (proof and-elim-left-
     :script
-  (assume [H (and- A B)] ;; i.e. (∀ [C :type] (==> (==> A B C) C))
-    (have <a> (==> (==> A B A) A)
-          :by (H A))
+  (assume [H (and- A B)]
+    (have <a> (==> (==> A B A) A) :by (H A))
     (assume [x A
              y B]
       (have <b> A :by x)
-      (have <c> (==> A B A)
-            :discharge [x y <b>])) ;; yields: (λ [x A] (λ [y B] <b>))
-    (have <e> A :by (<a> <c>))
-    (qed <e>)))
+      (have <c> (==> A B A) :discharge [x y <b>])) ;; (λ [x A] (λ [y B] x))
+    (have <d> A :by (<a> <c>))
+    (qed <d>)))
 
 ;; exercice : and-elim-right-  (solution? p/and-elim-right)
 
@@ -385,7 +375,8 @@
  (λ [x A] (λ [y B] (λ [C ✳] (λ [f (Π [⇧ A] (Π [⇧' B] C))] [[f x] y]))))
  ;; ^^^ and-intro- as a term ^^^
 
- (==> A B (and- A B)))
+ (==> A B
+      (and- A B)))
 
 ;; In Clojure :
 (fn [x] (fn [y] (fn [f] ((f x) y))))
@@ -427,64 +418,7 @@
 
 
 
-;;; # 2) a bit of (typed) Set Theory
-
-;;; Why the set <<<{p:program | p halts}|||(lambda(x)t)>>> cannot be a type in LaTTe?
-;;; ==> because unlike type inhabitation, set membership is not decidable
-
-;;; So how to represent a (typed) set in LaTTe?
-;;; A very effective approach is to use consider <<<sets as predicates|||(lambda(x)t)>>>
-
-(definition set
-  "The type of a set in type theory"
-  [[T :type]]
-  (==> T :type)) ;; a predicate over T
-
-;;; ### Set membership
-
-(definition elem   ;; x∈s = (elem T x s)
-  "Set membership"
-  [[T :type] [x T] [s (set T)]]
-  (s x))
-
-;;; ### Example 1: intersection
-
-(definition intersection
-  "s1 ∩ s2"
-  [[T :type] [s1 (set T)] [s2 (set T)]]
-  (λ [x T]
-    (and (elem T x s1)
-         (elem T x s2))))
-
-;;; ### Example 2: the complement of a set of type T
-
-(definition complement ""
-  [[T :type] [s (set T)]]
-  (λ [x T]
-    (not (elem T x s))))
-
-;;; ### Complement in classical set theory:
-;;; ∁(A) = { x ∈ U | x ∉ A }.
-;; but what is the "universe" U?
-
-
-
-;;; # Sets in Clojure
-
-;;; ### Interestingly ...
-
-;;; In Clojure a (finite) set is also a predicate!
-
-(#{1 2 4} 2)
-
-(#{1 2 4} 5)
-
-;; in Latte:
-;;; (λ [x nat] (or (equal nat x 1) (equal nat x 2) (equal nat x 4)))
-
-
-
-;;; # 3) A peek at equality
+;;; # 2) A peek at equality
 
 ;;; Equality is a non-trivial programming aspect
 
@@ -508,7 +442,7 @@
 (definition equal- ;; nameclash
   "Mr. Leibniz says..."
   [[T :type] [x T] [y T]]
-  (∀ [P (==> T :type)]
+  (forall [P (==> T :type)]
     (<=> (P x) (P y))))
 
 ;; As a consequence:
@@ -523,7 +457,7 @@
 
 ;;; ### Clojure counter-example
 ;; (but there's one for any programming language
-;; except for pointer equality)
+;; except for referential equality)
 
 (= [1 2 3 4] (range 1 5))
 
@@ -537,131 +471,44 @@
 
 
 
-;;; # The Peano arithmetics
-;;; ### in (a bunch of) blinks of an eye
+;;; # 3) Some "real" mathematics
 
-(defaxiom nat
-  "The first Peano primive: ℕ is a primitive set"
-  []
-  :type)
+(definition injective
+  "A function f is injective iff for ∀x,y, f(x)=f(y) ⟹ x=y."
+  [[T :type] [U :type] [f (==> T U)]]
+  (∀ [x y T]
+   (==> (equal U (f x) (f y))
+        (equal T x y))))
 
-(defaxiom zero
-  "The second Peano primitive: 0 is in ℕ"
-  []
-  nat)
+(defthm compose-injective
+  "if f and g are injective functions, then f°g is injective too"
+  [[T :type] [U :type] [V :type] [f (==> U V)] [g (==> T U)]]
+  (==> (injective U V f)
+       (injective T U g)
+       (injective T V (λ [x T] (f (g x))))))
 
-(defaxiom succ
-"The third Peano primitive: the successor function of type ℕ ⟶ ℕ"
-  []
-  (==> nat nat))
-
-(defaxiom nat-succ-not-surj
-  "The first Peano axiom: there is no successor in ℕ that equals 0"
-  []
-  (∀ [n nat]
-    (not (equal nat (succ n) zero))))
-
-(defaxiom nat-succ-inj
-  "The second Peano axiom: the successor function is injective"
-  []
-  (forall [n m nat]
-    (==> (equal nat (succ n) (succ m))
-         (equal nat n m))))
-
-(defaxiom nat-induct
-  "The third Peano axiom: induction principle on ℕ"
-  [[P (==> nat :type)]]
-  (==> (P zero)
-       (forall [k nat]
-         (==> (P k) (P (succ k))))
-       (forall [n nat] (P n))))
-
-
-
-;;; # A proof by induction
-
-(defthm nat-case
-  "Proof by case analysis."
-  [[P (==> nat :type)]]
-  (==> (P zero)
-       (forall [k nat] (P (succ k)))
-       (forall [n nat] (P n))))
-
-(proof nat-case
-  :script
-  "First we state our assumptions."     
-  (assume [Hz (P zero)
-           HS (forall [k nat] (P (succ k)))]
-          "Now we proceed by induction on n."
-          "base case (n=0): trivial since (P zero) by Hz"
-          "inductive case. Suppose (P k) for some natural number k"
-    (assume [k nat
-             Hind (P k)]
-            "Let's prove that (P (succ k))"
-            (have a (P (succ k)) :by (HS k))
-            "Hence for any k (==> (P k) (P succ k))"
-      (have b (forall [k nat]
-                (==> (P k) (P (succ k))))
-            :discharge [k Hind a]))
-    "Thus (P n) is true for any n thanks to nat-induct."
-    (have c (forall [n nat] (P n))
-          :by ((nat-induct P) Hz b))
-    (qed c)))
-
-(definition nat-split
-  "The split of natural numbers."
-  [[n nat]]
-  (==> (not (equal nat n zero))
-       (exists [m nat]
-         (equal nat n (succ m)))))
-  
-(defthm nat-strong
-  "A natural integer that is not zero is the successor of
-another integer"
-  []
-  (forall [n nat]
-    (nat-split n)))
-
-(proof nat-strong
+(proof compose-injective
     :script
-  "We do the proof by case analysis on n."
-  "1) case n=0 we show a contradiction"
-  "The hypothesis is that zero<>zero"
-  (assume [Hz (not (equal nat zero zero))]
-    "but of course zero=zero by reflexivity"
-    (have <a1> (equal nat zero zero) :by (eq/eq-refl nat zero))
-    "hence there is a contradiction"
-    (have <a2> p/absurd :by ((p/absurd-intro (equal nat zero zero))
-                             <a1> Hz))
-    "and from a contradiction we can get anything..."
-    (have <a3> (exists [m nat]
-                 (equal nat zero (succ m)))
-          :by (<a2> (exists [m nat]
-                      (equal nat zero (succ m)))))
-    (have <a> (nat-split zero) :discharge [Hz <a3>]))
-  "2) case n=k+1 for an arbitrary k"
-  "The assumption is that k+1<>0 is distinct from zero (which is vacuously true,
-but this is not in fact important)" 
-    (assume [k nat
-             Hk (not (equal nat (succ k) zero))]
-      "Let the predicate Q(m) such that k+1=m+1"
-      (have Q _ :by (lambda [m nat] (equal nat (succ k) (succ m))))
-      "Since  k+1 = k+1 by reflexivity we know that Q(k) is true."
-      (have <b1> (Q k)
-            :by (eq/eq-refl nat (succ k)))
-      "hence there exists an m such that k+1=m+1 (namely k)"
-      (have <b2> (exists [m nat]
-                   (equal nat (succ k) (succ m)))
-            :by ((q/ex-intro nat Q k) <b1>))
-      "hence we can deduce the case for k+1 from the case of k."
-      (have <b> (forall [k nat]
-                  (nat-split (succ k)))
-            :discharge [k Hk <b2>]))
-    "we can conclude by applying the case analysis theorem."
-    (have <concl> _
-          :by ((nat-case nat-split) <a> <b>))
-    (qed <concl>))
-    
+    "Our hypothesis is that f and g are injective."
+    (assume [Hf (injective U V f)
+             Hg (injective T U g)]
+      "We then have to prove that the composition is injective."
+      "For this we consider two arbitrary elements x and y
+ such that f(g(x)) = f(g(y))"
+      (assume [x T
+               y T
+               Hxy (equal V (f (g x)) (f (g y)))]
+        "Since f is injective we have: g(x) = g(y)."
+        (have <a> (equal U (g x) (g y)) :by (Hf (g x) (g y) Hxy))
+        "And since g is also injective we obtain: x = y."
+        (have <b> (equal T x y) :by (Hg x y <a>))
+        "Since x and y are arbitrary, f°g is thus injective."
+        (have <c> (∀ [x y T]
+                   (==> (equal V (f (g x)) (f (g y)))
+                        (equal T x y)))
+              :discharge [x y Hxy <b>]))
+    "Which is enough to conclude the proof."
+    (qed <c>)))
 
 
 ;;; # Aftermath ...

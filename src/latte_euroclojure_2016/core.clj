@@ -261,16 +261,13 @@
 
 ;;; ### Our objectives (in the few minutes to come):
 
-;;; 1) a glimpse of <<<natural deduction|||(lambda (x) t)>>> (logic)
+;;; 1) a bit of logic: <<<natural deduction|||(lambda (x) t)>>> (logic)
 
-;;; 2) a peek at <<<equality|||(lambda (x) t)>>> (according to Mr.Leibniz)
-
-;;; 3) take a dip in "real" <<<mathematics|||(lambda (x) t)>>>
-
+;;; 2) a taste of "real" mathematics: <<<injectivity|||(lambda (x) t)>>>
 
 
 
-;;; # 1) a glimpse of Natural Deduction
+;;; # 1) a bit of logic: Natural Deduction
 
 ;;; A simple characterization of (most) logical constructions
 ;;; based on <<<introduction rules|||(lambda (x)t)>>>
@@ -361,7 +358,8 @@
 
  ;; ^^^ and-intro- as a term ^^^
 
- (==> A B (and- A B)))
+ (==> A B
+      (and- A B)))
 
 ;; In Clojure :
 
@@ -402,60 +400,7 @@
 
 
 
-;;; # 2) A peek at equality
-
-;;; Equality is a non-trivial programming aspect
-
-;;; There are basically two approaches:
-
-;;; 1) polymorphic equality (e.g. Clojure, Common Lisp, Ocaml)
-
-;;; 2) user-definable equality (e.g. Java, Haskell, Python)
-
-;;; ... with strengthes and drawbacks, but
-;;; in both cases one can easily shoot oneself in the foot...
-;; (think about testing...)
-
-;;; ### Question
-;;; What about a  logical characterization? 
-
-
-
-;;; # Leibniz's indiscernibility of identicals
-
-(definition equal- ;; nameclash
-  "Mr. Leibniz says..."
-  [[T :type] [x T] [y T]]
-  (forall [P (==> T :type)]
-    (<=> (P x) (P y))))
-
-;; As a consequence:
-
-(defthm eq-cong- ""
-  [[T :type] [U :type] [f (==> T U)]
-   [x T] [y T]]
-  (==> (equal- T x y)
-       (equal- U (f x) (f y))))
-
-;; (proof is non-trivial, cf. <<<latte.equal/eq-cong|||(lambda(x)t)>>>)
-
-;;; ### Clojure counter-example
-;; (but there's one for any programming language
-;; except for referential equality)
-
-(= [1 2 3 4] (range 1 5))
-
-;; breaking equal
-(seq? [1 2 3 4])
-(seq? (range 1 5))
-
-;; breaking eq/cong
-(get [1 2 3 4] 2)
-(get (range 1 5) 2)
-
-
-
-;;; # 3) Some "real" mathematics
+;;; # 2) A taste of "real" mathematics: Injectivity
 
 "A function f is injective iff for ∀x,y, f(x)=f(y) ⟹ x=y."
 
