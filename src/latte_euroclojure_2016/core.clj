@@ -199,7 +199,7 @@
 
 (type-check?
  [Thing :type] [man (==> Thing :type)] [mortal (==> Thing :type)]
- [socrate Thing]
+ [socrats Thing]
 
  ✳
  
@@ -207,9 +207,9 @@
  
  (==> (∀ [t Thing]
         (==> (man t) (mortal t)))
-      (man socrate)
+      (man socrates)
       ;; thus
-      (mortal socrate)))
+      (mortal socrates)))
 
 
 
@@ -314,18 +314,12 @@
        (and- A B)))
 
 (proof and-intro-
-       :script
-       (assume [x A
-                y B]
-         (assume [C :type
-                  f (==> A B C)]
-            (have <a> (==> B C) :by (f x))
-            (have <b> C :by (<a> y))
-            (have <c> (forall [C :type]
-                         (==> (==> A B C)
-                              C))
-                  :discharge [C f <b>]))
-         (qed <c>)))
+    :term
+  (λ [x A]
+    (λ [y B]
+       (λ [C :type]
+          (λ [f (==> A B C)]
+             ((f x) y))))))
 
 
 
@@ -356,13 +350,14 @@
 (type-check?
  [A :type] [B :type]
 
+ (λ [x A] (λ [y B] (λ [C ✳] (λ [f (Π [⇧ A] (Π [⇧ B] C))] [[f x] y]))))	
  ;; ^^^ and-intro- as a term ^^^
 
  (==> A B
       (and- A B)))
 
 ;; In Clojure :
-
+(fn [x] (fn [y] (fn [f] ((f x) y))))
 
 
 
@@ -373,14 +368,14 @@
 (type-check?
  [A :type] [B :type]
 
- (λ [p (and- A B)] [[p A] (λ [x A] (λ [y B] x))])
-
+ 
  ;; ^^^ and-elim-left- as a term ^^^
 
- (==> (and- A B) A))
+ (==> (and- A B)
+      A))
 
 ;; In Clojure
-(fn [p] (p (fn [x] (fn [y] x))))
+
 
 
 
