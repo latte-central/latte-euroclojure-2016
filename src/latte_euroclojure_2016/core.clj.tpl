@@ -450,7 +450,7 @@
   "TODO")
 
 ;;;
-;;; ### Let's play together at: https://github.com/fredokun/LaTTe
+;;; ### Let's play together at: <<<https://github.com/fredokun/LaTTe|||(lambda(x)t)>>>
 ;;; you're just a `lein new my-cool-maths-in-clojure` away...
 ;; (no? really? how unfortunate :~( )
 
