@@ -350,14 +350,14 @@
 (type-check?
  [A :type] [B :type]
 
- (λ [x A] (λ [y B] (λ [C ✳] (λ [f (Π [⇧ A] (Π [⇧ B] C))] [[f x] y]))))	
+ 
  ;; ^^^ and-intro- as a term ^^^
 
  (==> A B
       (and- A B)))
 
 ;; In Clojure :
-(fn [x] (fn [y] (fn [f] ((f x) y))))
+
 
 
 
@@ -369,13 +369,14 @@
  [A :type] [B :type]
 
  
- ;; ^^^ and-elim-left- as a term ^^^
+ (λ [p (and- A B)] [[p A] (λ [x A] (λ [y B] x))])
+;; ^^^ and-elim-left- as a term ^^^
 
  (==> (and- A B)
       A))
 
 ;; In Clojure
-
+(fn [p] (p (fn [x] (fn [y] x))))
 
 
 

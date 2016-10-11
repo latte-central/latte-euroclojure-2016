@@ -27,9 +27,11 @@
 ;;; is heavily influenced by the following book:
 
 
+
 ;;; ## Type Theory and Formal Proof: an Introduction
 ;;; ### Rob Nederpelt and Herman Geuvers
 ;; Cambridge University Press, 2012
+
 
 
 ;;;               __...--~~~~~-._   _.-~~~~~--...__
@@ -266,16 +268,13 @@
 
 ;;; ### Our objectives (in the few minutes to come):
 
-;;; 1) a glimpse of <<<natural deduction|||(lambda (x) t)>>> (logic)
+;;; 1) a bit of logic: <<<natural deduction|||(lambda (x) t)>>> (logic)
 
-;;; 2) a peek at <<<equality|||(lambda (x) t)>>> (according to Mr.Leibniz)
-
-;;; 3) take a dip in "real" <<<mathematics|||(lambda (x) t)>>>
-
+;;; 2) a taste of "real" mathematics: <<<injectivity|||(lambda (x) t)>>>
 
 
 
-;;; # 1) a glimpse of Natural Deduction
+;;; # 1) a bit of logic: Natural Deduction
 
 ;;; A simple characterization of (most) logical constructions
 ;;; based on <<<introduction rules|||(lambda (x)t)>>>
@@ -322,18 +321,12 @@
        (and- A B)))
 
 (proof and-intro-
-       :script
-       (assume [x A
-                y B]
-         (assume [C :type
-                  f (==> A (==> B C))]
-            (have <a> (==> B C) :by (f x))
-            (have <b> C :by (<a> y))
-            (have <c> (forall [C :type]
-                         (==> (==> A B C)
-                              C))
-                  :discharge [C f <b>])) ;; (λ [C :type] (λ [f (==> A B C)] <b>))
-         (qed <c>)))
+    :term
+  (λ [x A]
+    (λ [y B]
+       (λ [C :type]
+          (λ [f (==> A B C)]
+             ((f x) y))))))
 
 
 
@@ -352,12 +345,12 @@
 
 (proof and-elim-left-
     :script
-  (assume [H (and- A B)]
-    (have <a> (==> (==> A B A) A) :by (H A))
+  (assume [p (and- A B)]
+    (have <a> (==> (==> A B A) A) :by (p A))
     (assume [x A
              y B]
       (have <b> A :by x)
-      (have <c> (==> A B A) :discharge [x y <b>])) ;; (λ [x A] (λ [y B] x))
+      (have <c> (==> A B A) :discharge [x y <b>])) 
     (have <d> A :by (<a> <c>))
     (qed <d>)))
 
@@ -372,7 +365,7 @@
 (type-check?
  [A :type] [B :type]
 
- (λ [x A] (λ [y B] (λ [C ✳] (λ [f (Π [⇧ A] (Π [⇧' B] C))] [[f x] y]))))
+ (λ [x A] (λ [y B] (λ [C ✳] (λ [f (Π [⇧ A] (Π [⇧ B] C))] [[f x] y]))))
  ;; ^^^ and-intro- as a term ^^^
 
  (==> A B
@@ -392,10 +385,10 @@
  [A :type] [B :type]
 
  (λ [p (and- A B)] [[p A] (λ [x A] (λ [y B] x))])
-
  ;; ^^^ and-elim-left- as a term ^^^
 
- (==> (and- A B) A))
+ (==> (and- A B)
+      A))
 
 ;; In Clojure
 (fn [p] (p (fn [x] (fn [y] x))))
@@ -418,67 +411,13 @@
 
 
 
-;;; # 2) A peek at equality
-
-;;; Equality is a non-trivial programming aspect
-
-;;; There are basically two approaches:
-
-;;; 1) polymorphic equality (e.g. Clojure, Common Lisp, Ocaml)
-
-;;; 2) user-definable equality (e.g. Java, Haskell, Python)
-
-;;; ... with strengthes and drawbacks, but
-;;; in both cases one can easily shoot oneself in the foot...
-;; (think about testing...)
-
-;;; ### Question
-;;; What about a  logical characterization? 
-
-
-
-;;; # Leibniz's indiscernibility of identicals
-
-(definition equal- ;; nameclash
-  "Mr. Leibniz says..."
-  [[T :type] [x T] [y T]]
-  (forall [P (==> T :type)]
-    (<=> (P x) (P y))))
-
-;; As a consequence:
-
-(defthm eq-cong- ""
-  [[T :type] [U :type] [f (==> T U)]
-   [x T] [y T]]
-  (==> (equal- T x y)
-       (equal- U (f x) (f y))))
-
-;; (proof is non-trivial, cf. <<<latte.equal/eq-cong|||(lambda(x)t)>>>)
-
-;;; ### Clojure counter-example
-;; (but there's one for any programming language
-;; except for referential equality)
-
-(= [1 2 3 4] (range 1 5))
-
-;; breaking equal
-(seq? [1 2 3 4])
-(seq? (range 1 5))
-
-;; breaking eq/cong
-(get [1 2 3 4] 2)
-(get (range 1 5) 2)
-
-
-
-;;; # 3) Some "real" mathematics
+;;; # 2) A taste of "real" mathematics: Injectivity
 
 (definition injective
   "A function f is injective iff for ∀x,y, f(x)=f(y) ⟹ x=y."
   [[T :type] [U :type] [f (==> T U)]]
-  (∀ [x y T]
-   (==> (equal U (f x) (f y))
-        (equal T x y))))
+  (∀ [x y T] (==> (equal U (f x) (f y))
+                  (equal T x y))))
 
 (defthm compose-injective
   "if f and g are injective functions, then f°g is injective too"
@@ -489,26 +428,30 @@
 
 (proof compose-injective
     :script
-    "Our hypothesis is that f and g are injective."
-    (assume [Hf (injective U V f)
-             Hg (injective T U g)]
-      "We then have to prove that the composition is injective."
-      "For this we consider two arbitrary elements x and y
+  "Our hypothesis is that f and g are injective."
+  (assume [Hf (injective U V f)
+           Hg (injective T U g)]
+    "We then have to prove that the composition is injective."
+    "For this we consider two arbitrary elements x and y
  such that f(g(x)) = f(g(y))"
-      (assume [x T
-               y T
-               Hxy (equal V (f (g x)) (f (g y)))]
-        "Since f is injective we have: g(x) = g(y)."
-        (have <a> (equal U (g x) (g y)) :by (Hf (g x) (g y) Hxy))
-        "And since g is also injective we obtain: x = y."
-        (have <b> (equal T x y) :by (Hg x y <a>))
-        "Since x and y are arbitrary, f°g is thus injective."
-        (have <c> (∀ [x y T]
-                   (==> (equal V (f (g x)) (f (g y)))
-                        (equal T x y)))
-              :discharge [x y Hxy <b>]))
+    (assume [x T
+             y T
+             Hxy (equal V (f (g x)) (f (g y)))]
+      
+      "Since f is injective we have: g(x) = g(y)."
+      (have <a> (equal U (g x) (g y)) :by (Hf (g x) (g y) Hxy))
+      
+      "And since g is also injective we obtain: x = y."
+      (have <b> (equal T x y) :by (Hg x y <a>))
+      "Since x and y are arbitrary, f°g is thus injective."
+      (have <c> (∀ [x y T]
+                 (==> (equal V (f (g x)) (f (g y)))
+                      (equal T x y))) :discharge [x y Hxy <b>]))
+    (have <d> (injective T V (λ [x T] (f (g x)))) :by <c>)
+    
     "Which is enough to conclude the proof."
-    (qed <c>)))
+    (qed <d>)))
+    
 
 
 ;;; # Aftermath ...
@@ -543,7 +486,7 @@
   "TODO")
 
 ;;;
-;;; ### Let's play together at: https://github.com/fredokun/LaTTe
+;;; ### Let's play together at: <<<https://github.com/fredokun/LaTTe|||(lambda(x)t)>>>
 ;;; you're just a `lein new my-cool-maths-in-clojure` away...
 ;; (no? really? how unfortunate :~( )
 
