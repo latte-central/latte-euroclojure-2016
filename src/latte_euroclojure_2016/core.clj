@@ -148,7 +148,7 @@
 
 
 ;;; # The type-generic composition function
-;; ((fn [f] (fn [g] (fn [x] (g (f x)))))) in LaTTe
+;; in Clojure: ((fn [f] (fn [g] (fn [x] (g (f x))))))
 
 (type-check?
 
@@ -199,7 +199,7 @@
 
 (type-check?
  [Thing :type] [man (==> Thing :type)] [mortal (==> Thing :type)]
- [socrats Thing]
+ [socrates Thing]
 
  ✳
  
