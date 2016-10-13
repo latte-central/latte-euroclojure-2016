@@ -7,7 +7,7 @@
          ;;;                  ((((
          ;;;                 ((((
          ;;;                  ))))
-         ;;;               _ .---.
+         ;;;               _ .---.     
          ;;;              ( |`---'|
          ;;;               \|     |
          ;;;               : .___, :
@@ -22,10 +22,8 @@
 
 ;;; # To give credit where credit is due ...
 
-
 ;;; The theory underlying LaTTe (as well as its basic library)
 ;;; is heavily influenced by the following book:
-
 
 
 ;;; ## Type Theory and Formal Proof: an Introduction
@@ -49,8 +47,8 @@
 (ns latte-euroclojure-2016.core
   "This is a talk about LaTTe given @ Euroclojure 2016."
 
-  ;; These belong to logic and mathematics ;-)
-  (:refer-clojure :exclude [and or not set complement])
+  ;; These belong to logic ;-)
+  (:refer-clojure :exclude [and or not])
 
   ;; LaTTe core and main top-level forms
   (:require [latte.core :as latte
