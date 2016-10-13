@@ -333,50 +333,21 @@
 
 (defthm and-elim-left- ""
   [[A :type] [B :type]]
-   ✳)
+   (==> (and- A B)
+        A))
 
-(try-proof and-elim-left-
+(proof and-elim-left-
     :script
-  "todo")
+  (assume [p (and- A B)]
+    (have <a> (==> (==> A B A) A) :by (p A))
+    (assume [x A
+             y B]
+      (have <b> A :by x)
+      (have <c> (==> A B A) :discharge [x y <b>])) 
+    (have <d> A :by (<a> <c>))
+    (qed <d>)))
 
 ;; exercice : and-elim-right-  (solution? p/and-elim-right)
-
-
-
-;;; # Conjunction introduction looks familiar!
-
-;;; Let's slowly remove types in <<<and-intro-|||(lambda (x)t)>>>
-
-(type-check?
- [A :type] [B :type]
-
- 
- ;; ^^^ and-intro- as a term ^^^
-
- (==> A B
-      (and- A B)))
-
-;; In Clojure :
-
-
-
-
-;;; # Conjunction elimination looks familiar too!
-
-;;; Let's slowly remove types in <<<and-elim-left-|||(lambda (x)t)>>>
-
-(type-check?
- [A :type] [B :type]
-
- 
- (λ [p (and- A B)] [[p A] (λ [x A] (λ [y B] x))])
-;; ^^^ and-elim-left- as a term ^^^
-
- (==> (and- A B)
-      A))
-
-;; In Clojure
-(fn [p] (p (fn [x] (fn [y] x))))
 
 
 
@@ -384,8 +355,13 @@
 ;;; # Conjunction as computation (in Clojure)
 
 ;; We have:
-(def intro (fn [x] (fn [y] (fn [f] ((f x) y)))))
+;; intro in Latte: (λ [x A] (λ [y B] (λ [C :type] (λ [f (==> A B C)] ((f x) y))))
+(def intro ✳)
+
+;; elim-left: (λ [p (and- A B)] ((p A) (λ [x A] (λ [y B] x))))
 (def left (fn [p] (p (fn [x] (fn [y] x)))))
+
+;; elim-left: (λ [p (and- A B)] ((p B) (λ [x A] (λ [y B] y))))
 (def right (fn [p] (p (fn [x] (fn [y] y)))))
 
 ;; Have these functions any computational meaning?
@@ -416,7 +392,7 @@
 "Since x and y are arbitrary, f°g is thus injective."
 
 "Which is enough to conclude the proof."
-    
+
 
 
 ;;; # Aftermath ...
