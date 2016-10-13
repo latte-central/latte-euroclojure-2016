@@ -337,18 +337,21 @@
         A))
 
 (proof and-elim-left-
-    :script
+  :script
+  "Our hypothesis"     
   (assume [p (and- A B)]
+    "The starting point: use the definition of conjunction."
     (have <a> (==> (==> A B A) A) :by (p A))
+    "We need to prove that if A is true and B is true then A is true"
     (assume [x A
              y B]
       (have <b> A :by x)
-      (have <c> (==> A B A) :discharge [x y <b>])) 
+      (have <c> (==> A B A) :discharge [x y <b>]))
+    "Now we can use <a> as a function"
     (have <d> A :by (<a> <c>))
     (qed <d>)))
 
 ;; exercice : and-elim-right-  (solution? p/and-elim-right)
-
 
 
 

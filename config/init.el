@@ -64,6 +64,7 @@
 
 ;; disable toolbar
 (tool-bar-mode -1)
+(scroll-bar-mode -1)
 
 ;; split window horizontally
 (setq split-width-threshold 0)
@@ -77,6 +78,7 @@
 
 (global-set-key (kbd "C-&") 'live-clojure-talks-mode)
 (global-set-key (kbd "C-²") 'smartparens-strict-mode)
+(global-set-key (kbd "C-œ") 'smartparens-strict-mode)
 
 (global-set-key (kbd "C-z") 'undo)
 
@@ -156,9 +158,9 @@
 
 ;; ido mode
 
-(setq ido-enable-flex-matching t)
-(setq ido-everywhere t)
-(ido-mode 1)
+;;(setq ido-enable-flex-matching t)
+;;(setq ido-everywhere t)
+;;(ido-mode 1)
 
 ;; abbrevs
 (add-hook 'clojure-mode-hook (lambda () (abbrev-mode 1)))
