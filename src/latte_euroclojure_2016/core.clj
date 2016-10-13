@@ -405,6 +405,8 @@
 
 ;;; Formalizing and proving things can be a very addictive <<<puzzle game|||(lambda (x) t)>>> with:
 
+;;; - Relatively simple rules: a lambda-calculus with explicit types
+
 ;;; - An almighty adversary: <<<mathematics|||(lambda(x)t)>>>
 
 ;;; - An <<<unlimited|||(lambda(x)t)>>> number of puzzles:
