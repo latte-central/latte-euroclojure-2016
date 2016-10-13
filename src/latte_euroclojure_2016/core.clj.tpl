@@ -20,11 +20,11 @@
 
 
 
-;;; # To give credit where credit is due ...
+;;; # Acknowledgment ...
+;; \ik-ˈnä-lij-mənt, ak-\
 
 ;;; The theory underlying LaTTe (as well as its basic library)
 ;;; is heavily influenced by the following book:
-
 
 ;;; ## Type Theory and Formal Proof: an Introduction
 ;;; ### Rob Nederpelt and Herman Geuvers
@@ -373,7 +373,8 @@
 
 
 
-;;; # 2) A taste of "real" mathematics: Injectivity
+;;; # 2) A taste of "real" mathematics
+;;; ## Injectivity
 
 "A function f is injective iff for ∀x,y, f(x)=f(y) ⟹ x=y."
 
