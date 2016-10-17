@@ -6,10 +6,10 @@
 
          ;;;                  ((((
          ;;;                 ((((
-         ;;;                  ))))
-         ;;;               _ .---.
-         ;;;              ( |`---'|
-         ;;;               \|     |
+         ;;;                  ))))             or
+         ;;;               _ .---.                <<<Curry|||lambda(x)t>>>-     
+         ;;;              ( |`---'|                  <<<Howard|||lambda(x)t>>>
+         ;;;               \|     |                     without the fuss
          ;;;               : .___, :
          ;;;                `-----'  -Karl
 
@@ -20,13 +20,11 @@
 
 
 
-;;; # To give credit where credit is due ...
-
+;;; # Acknowledgment ...
+;; \ik-ˈnä-lij-mənt, ak-\
 
 ;;; The theory underlying LaTTe (as well as its basic library)
 ;;; is heavily influenced by the following book:
-
-
 
 ;;; ## Type Theory and Formal Proof: an Introduction
 ;;; ### Rob Nederpelt and Herman Geuvers
@@ -49,8 +47,8 @@
 (ns latte-euroclojure-2016.core
   "This is a talk about LaTTe given @ Euroclojure 2016."
 
-  ;; These belong to logic and mathematics ;-)
-  (:refer-clojure :exclude [and or not set complement])
+  ;; These belong to logic ;-)
+  (:refer-clojure :exclude [and or not])
 
   ;; LaTTe core and main top-level forms
   (:require [latte.core :as latte
@@ -84,8 +82,8 @@
 
 
 
-;;; # LaTTe (kernel) = Lambda with explicit types
-;;; ## (a.k.a. a Type Theory)
+;;; # LaTTe (kernel) = a Type Theory
+;;; ## = Lambda with explicit types
 ;;;                _..._
 ;;;              .'     '.
 ;;;             /`\     /`\    |\         <<<but...|||(lambda (x) t)>>>
@@ -149,7 +147,7 @@
 
 
 ;;; # The type-generic composition function
-;; ((fn [f] (fn [g] (fn [x] (g (f x)))))) in LaTTe
+;; in Clojure: ((fn [f] (fn [g] (fn [x] (g (f x))))))
 
 (type-check?
 
@@ -340,17 +338,21 @@
 
 (defthm and-elim-left- ""
   [[A :type] [B :type]]
-  (==> (and- A B)
-       A))
+   (==> (and- A B)
+        A))
 
 (proof and-elim-left-
-    :script
+  :script
+  "Our hypothesis"     
   (assume [p (and- A B)]
+    "The starting point: use the definition of conjunction."
     (have <a> (==> (==> A B A) A) :by (p A))
+    "We need to prove that if A is true and B is true then A is true"
     (assume [x A
              y B]
       (have <b> A :by x)
-      (have <c> (==> A B A) :discharge [x y <b>])) 
+      (have <c> (==> A B A) :discharge [x y <b>]))
+    "Now we can use <a> as a function"
     (have <d> A :by (<a> <c>))
     (qed <d>)))
 
@@ -358,49 +360,16 @@
 
 
 
-;;; # Conjunction introduction looks familiar!
-
-;;; Let's slowly remove types in <<<and-intro-|||(lambda (x)t)>>>
-
-(type-check?
- [A :type] [B :type]
-
- (λ [x A] (λ [y B] (λ [C ✳] (λ [f (Π [⇧ A] (Π [⇧ B] C))] [[f x] y]))))
- ;; ^^^ and-intro- as a term ^^^
-
- (==> A B
-      (and- A B)))
-
-;; In Clojure :
-(fn [x] (fn [y] (fn [f] ((f x) y))))
-
-
-
-
-;;; # Conjunction elimination looks familiar too!
-
-;;; Let's slowly remove types in <<<and-elim-left-|||(lambda (x)t)>>>
-
-(type-check?
- [A :type] [B :type]
-
- (λ [p (and- A B)] [[p A] (λ [x A] (λ [y B] x))])
- ;; ^^^ and-elim-left- as a term ^^^
-
- (==> (and- A B)
-      A))
-
-;; In Clojure
-(fn [p] (p (fn [x] (fn [y] x))))
-
-
-
-
 ;;; # Conjunction as computation (in Clojure)
 
 ;; We have:
+;; intro in Latte: (λ [x A] (λ [y B] (λ [C :type] (λ [f (==> A B C)] ((f x) y))))
 (def intro (fn [x] (fn [y] (fn [f] ((f x) y)))))
+
+;; elim-left: (λ [p (and- A B)] ((p A) (λ [x A] (λ [y B] x))))
 (def left (fn [p] (p (fn [x] (fn [y] x)))))
+
+;; elim-left: (λ [p (and- A B)] ((p B) (λ [x A] (λ [y B] y))))
 (def right (fn [p] (p (fn [x] (fn [y] y)))))
 
 ;; Have these functions any computational meaning?
@@ -411,7 +380,8 @@
 
 
 
-;;; # 2) A taste of "real" mathematics: Injectivity
+;;; # 2) A taste of "real" mathematics
+;;; ## Injectivity
 
 (definition injective
   "A function f is injective iff for ∀x,y, f(x)=f(y) ⟹ x=y."
@@ -428,30 +398,31 @@
 
 (proof compose-injective
     :script
-  "Our hypothesis is that f and g are injective."
-  (assume [Hf (injective U V f)
-           Hg (injective T U g)]
-    "We then have to prove that the composition is injective."
-    "For this we consider two arbitrary elements x and y
+    "Our hypothesis is that f and g are injective."
+    (assume [Hf (injective U V f)
+             Hg (injective T U g)]
+      "We then have to prove that the composition is injective."
+      
+      "For this we consider two arbitrary elements x and y
  such that f(g(x)) = f(g(y))"
-    (assume [x T
-             y T
-             Hxy (equal V (f (g x)) (f (g y)))]
-      
-      "Since f is injective we have: g(x) = g(y)."
-      (have <a> (equal U (g x) (g y)) :by (Hf (g x) (g y) Hxy))
-      
-      "And since g is also injective we obtain: x = y."
-      (have <b> (equal T x y) :by (Hg x y <a>))
-      "Since x and y are arbitrary, f°g is thus injective."
-      (have <c> (∀ [x y T]
-                 (==> (equal V (f (g x)) (f (g y)))
-                      (equal T x y))) :discharge [x y Hxy <b>]))
-    (have <d> (injective T V (λ [x T] (f (g x)))) :by <c>)
-    
-    "Which is enough to conclude the proof."
-    (qed <d>)))
-    
+      (assume [x T
+               y T
+               Hxy (equal V (f (g x)) (f (g y)))]
+        
+        "Since f is injective we have: g(x) = g(y)."
+        (have <a> (equal U (g x) (g y))
+              :by (Hf (g x) (g y) Hxy))
+        
+        "And since g is also injective we obtain: x = y."
+        (have <b> (equal T x y) :by (Hg x y <a>))
+
+        "Since x and y are arbitrary, f°g is thus injective."
+        (have <c> (injective T V (λ [x T] (f (g x))))
+              :discharge [x y Hxy <b>]))
+
+      "Which is enough to conclude the proof."
+      (qed <c>)))
+
 
 
 ;;; # Aftermath ...
@@ -460,6 +431,8 @@
 ;; but ... wait! this *is* live-coding in Clojure!
 
 ;;; Formalizing and proving things can be a very addictive <<<puzzle game|||(lambda (x) t)>>> with:
+
+;;; - Relatively simple rules: a lambda-calculus with explicit types
 
 ;;; - An almighty adversary: <<<mathematics|||(lambda(x)t)>>>
 

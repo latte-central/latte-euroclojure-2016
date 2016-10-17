@@ -6,10 +6,10 @@
 
          ;;;                  ((((
          ;;;                 ((((
-         ;;;                  ))))        or
-         ;;;               _ .---.           <<<Curry|||lambda(x)t>>>-     
-         ;;;              ( |`---'|             <<<Howard|||lambda(x)t>>>
-         ;;;               \|     |                without the fuss
+         ;;;                  ))))             or
+         ;;;               _ .---.                <<<Curry|||lambda(x)t>>>-     
+         ;;;              ( |`---'|                  <<<Howard|||lambda(x)t>>>
+         ;;;               \|     |                     without the fuss
          ;;;               : .___, :
          ;;;                `-----'  -Karl
 
@@ -82,8 +82,8 @@
 
 
 
-;;; # LaTTe (kernel) = Lambda with explicit types
-;;; ## (a.k.a. a Type Theory)
+;;; # LaTTe (kernel) = a Type Theory
+;;; ## = Lambda with explicit types
 ;;;                _..._
 ;;;              .'     '.
 ;;;             /`\     /`\    |\         <<<but...|||(lambda (x) t)>>>
