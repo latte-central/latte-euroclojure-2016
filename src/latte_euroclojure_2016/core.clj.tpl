@@ -83,7 +83,7 @@
 
 
 ;;; # LaTTe (kernel) = a Type Theory
-;;; ## = Lambda with explicit types
+;;; ## = Lambda with explicit (dependent) types
 ;;;                _..._
 ;;;              .'     '.
 ;;;             /`\     /`\    |\         <<<but...|||(lambda (x) t)>>>
@@ -249,7 +249,7 @@
 ;;; - any Clojure Development environment can be used to do maths!
 ;; (e.g. I use both Cider and Gorilla Repl, sometimes together via nrepl...)
 
-;;; - it leverages the Clojure (JVM/Maven) ecosystem for <<<proving in the large|||t>>>
+;;; - it leverages the Clojure (Clojars) ecosystem for <<<proving in the large|||t>>>
 
 ;;; - it supports a DSL for declarative proof scripts <<<<-- hot!|||t>>>
 
@@ -404,7 +404,7 @@
 
 ;;; Formalizing and proving things can be a very addictive <<<puzzle game|||(lambda (x) t)>>> with:
 
-;;; - Relatively simple rules: a lambda-calculus with explicit types
+;;; - Relatively simple rules: a lambda-calculus with explicit (dependent) types
 
 ;;; - An almighty adversary: <<<mathematics|||(lambda(x)t)>>>
 

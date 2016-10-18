@@ -7,9 +7,9 @@
          ;;;                  ((((
          ;;;                 ((((
          ;;;                  ))))             or
-         ;;;               _ .---.                <<<Curry|||lambda(x)t>>>-     
+         ;;;               _ .---.               <<<Curry|||lambda(x)t>>>-     
          ;;;              ( |`---'|                  <<<Howard|||lambda(x)t>>>
-         ;;;               \|     |                     without the fuss
+         ;;;               \|     |                        without the fuss
          ;;;               : .___, :
          ;;;                `-----'  -Karl
 
@@ -83,7 +83,7 @@
 
 
 ;;; # LaTTe (kernel) = a Type Theory
-;;; ## = Lambda with explicit types
+;;; ## = Lambda with explicit dependent types
 ;;;                _..._
 ;;;              .'     '.
 ;;;             /`\     /`\    |\         <<<but...|||(lambda (x) t)>>>
@@ -115,7 +115,7 @@
 
 
 
-;;; # Types, really?
+;;; # (Dependent) Types, really?
 
 
 ;;; ### Example: the (type-generic) identity function
@@ -144,6 +144,7 @@
  (∀ [A :type]
   (==> A A)))
 
+
 
 
 ;;; # The type-generic composition function
@@ -165,6 +166,7 @@
   (==> (==> A B)
        (==> B C)
        (==> A C))))
+
 
 
 
@@ -351,7 +353,8 @@
     (assume [x A
              y B]
       (have <b> A :by x)
-      (have <c> (==> A B A) :discharge [x y <b>]))
+      (have <c> (==> A B A)
+            :discharge [x y <b>])) ;; (λ [x A] (λ [y B] <x>))
     "Now we can use <a> as a function"
     (have <d> A :by (<a> <c>))
     (qed <d>)))
@@ -391,37 +394,36 @@
 
 (defthm compose-injective
   "if f and g are injective functions, then f°g is injective too"
-  [[T :type] [U :type] [V :type] [f (==> U V)] [g (==> T U)]]
+  [[T :type] [U :type] [V :type ][f (==> U V)] [g (==> T U)]]
   (==> (injective U V f)
        (injective T U g)
        (injective T V (λ [x T] (f (g x))))))
 
 (proof compose-injective
     :script
-    "Our hypothesis is that f and g are injective."
-    (assume [Hf (injective U V f)
-             Hg (injective T U g)]
-      "We then have to prove that the composition is injective."
-      
-      "For this we consider two arbitrary elements x and y
+  "Our hypothesis is that f and g are injective."
+  (assume [Hf (injective U V f)
+           Hg (injective T U g)]
+    "We then have to prove that the composition is injective."
+
+    "For this we consider two arbitrary elements x and y
  such that f(g(x)) = f(g(y))"
-      (assume [x T
-               y T
-               Hxy (equal V (f (g x)) (f (g y)))]
-        
-        "Since f is injective we have: g(x) = g(y)."
-        (have <a> (equal U (g x) (g y))
-              :by (Hf (g x) (g y) Hxy))
-        
-        "And since g is also injective we obtain: x = y."
-        (have <b> (equal T x y) :by (Hg x y <a>))
+    (assume [x T
+             y T
+             Hxy (equal V (f (g x)) (f (g y)))]
+      
+      "Since f is injective we have: g(x) = g(y)."
+      (have <a> (equal U (g x) (g y)) :by (Hf (g x) (g y) Hxy))
+      
+      "And since g is also injective we obtain: x = y."
+      (have <b> (equal T x y) :by (Hg x y <a>))
 
-        "Since x and y are arbitrary, f°g is thus injective."
-        (have <c> (injective T V (λ [x T] (f (g x))))
-              :discharge [x y Hxy <b>]))
-
-      "Which is enough to conclude the proof."
-      (qed <c>)))
+      "Since x and y are arbitrary, f°g is thus injective."
+      (have <c> (injective T V (λ [x T] (f (g x))))
+            :discharge [x y Hxy <b>]))
+    
+    "Which is enough to conclude the proof."
+    (qed <c>)))
 
 
 
