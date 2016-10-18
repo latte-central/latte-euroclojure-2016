@@ -7,9 +7,9 @@
          ;;;                  ((((
          ;;;                 ((((
          ;;;                  ))))             or
-         ;;;               _ .---.                <<<Curry|||lambda(x)t>>>-     
-         ;;;              ( |`---'|                  <<<Howard|||lambda(x)t>>>
-         ;;;               \|     |                     without the fuss
+         ;;;               _ .---.               <<<Curry|||lambda(x)t>>>-     
+         ;;;              ( |`---'|                 <<<Howard|||lambda(x)t>>>
+         ;;;               \|     |                       without the fuss
          ;;;               : .___, :
          ;;;                `-----'  -Karl
 
