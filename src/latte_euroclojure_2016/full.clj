@@ -8,8 +8,8 @@
          ;;;                 ((((
          ;;;                  ))))             or
          ;;;               _ .---.               <<<Curry|||lambda(x)t>>>-     
-         ;;;              ( |`---'|                  <<<Howard|||lambda(x)t>>>
-         ;;;               \|     |                        without the fuss
+         ;;;              ( |`---'|                 <<<Howard|||lambda(x)t>>>
+         ;;;               \|     |                       without the fuss
          ;;;               : .___, :
          ;;;                `-----'  -Karl
 
@@ -83,7 +83,7 @@
 
 
 ;;; # LaTTe (kernel) = a Type Theory
-;;; ## = Lambda with explicit dependent types
+;;; ## = Lambda with explicit (dependent) types
 ;;;                _..._
 ;;;              .'     '.
 ;;;             /`\     /`\    |\         <<<but...|||(lambda (x) t)>>>
@@ -115,7 +115,7 @@
 
 
 
-;;; # (Dependent) Types, really?
+;;; # Types, really?
 
 
 ;;; ### Example: the (type-generic) identity function
@@ -144,7 +144,6 @@
  (∀ [A :type]
   (==> A A)))
 
-
 
 
 ;;; # The type-generic composition function
@@ -166,7 +165,6 @@
   (==> (==> A B)
        (==> B C)
        (==> A C))))
-
 
 
 
@@ -251,14 +249,14 @@
 ;;; ## About LaTTe
 ;;; LaTTe is a proof assistant implemented as a Clojure library
 ;;; with top-level forms for axioms, definitions, theorems and proofs.
-;; available on Clojars: <<<[latte "0.3.5-SNAPSHOT"]|||(lambda (x) t)>>>
+;; available on Clojars: <<<[latte "0.3.7-SNAPSHOT"]|||(lambda (x) t)>>>
 
 ;;; ## Notable features
 
 ;;; - any Clojure Development environment can be used to do maths!
 ;; (e.g. I use both Cider and Gorilla Repl, sometimes together via nrepl...)
 
-;;; - it leverages the Clojure (JVM/Maven) ecosystem for <<<proving in the large|||t>>>
+;;; - it leverages the Clojure (Clojars) ecosystem for <<<proving in the large|||t>>>
 
 ;;; - it supports a DSL for declarative proof scripts <<<<-- hot!|||t>>>
 
@@ -353,8 +351,7 @@
     (assume [x A
              y B]
       (have <b> A :by x)
-      (have <c> (==> A B A)
-            :discharge [x y <b>])) ;; (λ [x A] (λ [y B] <x>))
+      (have <c> (==> A B A) :discharge [x y <b>]))
     "Now we can use <a> as a function"
     (have <d> A :by (<a> <c>))
     (qed <d>)))
@@ -394,7 +391,7 @@
 
 (defthm compose-injective
   "if f and g are injective functions, then f°g is injective too"
-  [[T :type] [U :type] [V :type ][f (==> U V)] [g (==> T U)]]
+  [[T :type] [U :type] [V :type] [f (==> U V)] [g (==> T U)]]
   (==> (injective U V f)
        (injective T U g)
        (injective T V (λ [x T] (f (g x))))))
@@ -413,15 +410,17 @@
              Hxy (equal V (f (g x)) (f (g y)))]
       
       "Since f is injective we have: g(x) = g(y)."
-      (have <a> (equal U (g x) (g y)) :by (Hf (g x) (g y) Hxy))
+      (have <a> (equal U (g x) (g y))
+            :by (Hf (g x) (g y) Hxy))
       
       "And since g is also injective we obtain: x = y."
-      (have <b> (equal T x y) :by (Hg x y <a>))
+      (have <b> (equal T x y)
+            :by (Hg x y <a>))
 
       "Since x and y are arbitrary, f°g is thus injective."
       (have <c> (injective T V (λ [x T] (f (g x))))
             :discharge [x y Hxy <b>]))
-    
+
     "Which is enough to conclude the proof."
     (qed <c>)))
 
@@ -434,7 +433,7 @@
 
 ;;; Formalizing and proving things can be a very addictive <<<puzzle game|||(lambda (x) t)>>> with:
 
-;;; - Relatively simple rules: a lambda-calculus with explicit types
+;;; - Relatively simple rules: a lambda-calculus with explicit (dependent) types
 
 ;;; - An almighty adversary: <<<mathematics|||(lambda(x)t)>>>
 
