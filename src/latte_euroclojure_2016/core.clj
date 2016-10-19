@@ -242,7 +242,7 @@
 ;;; ## About LaTTe
 ;;; LaTTe is a proof assistant implemented as a Clojure library
 ;;; with top-level forms for axioms, definitions, theorems and proofs.
-;; available on Clojars: <<<[latte "0.3.5-SNAPSHOT"]|||(lambda (x) t)>>>
+;; available on Clojars: <<<[latte "0.3.7-SNAPSHOT"]|||(lambda (x) t)>>>
 
 ;;; ## Notable features
 
