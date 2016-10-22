@@ -218,12 +218,36 @@
 
 
 
+;;; # The rules of the games ...
+;; a.k.a. The LaTTe (kernel) calculus
+
+;;; ### Syntax
+;;; - <<<the type of types|||(lambda (x)t)>>>: :type (or ✳)
+;;; - <<<the type of :type|||(lambda (x)t)>>>: :kind (or □)
+;;; - <<<variables|||(lambda (x)t)>>>:  x, y, etc..
+;;; - <<<abstractions|||(lambda (x)t)>>>: (λ [x <type>] <body>)
+;;; - <<<products|||(lambda (x)t)>>>: (∀ [x <type>] <type>)
+;;; - <<<applications|||(lambda (x)t)>>>: (<fun> <arg>)
+
+;;; ### Alpha-conversion and equivalence
+;;; t1 = t2  if they are the same up-to renaming of bound variables
+;; e.g.:  (λ [x A] x) = (λ [y A] y)
+
+;;; ### Beta-reduction (≅semantics)
+;;; ((λ [x <type>] <body>) <arg>) ⟶ <body>{<arg>/x}
+;; e.g.: ((λ [x A] (y x)) (a b)) ⟶ (y (a b))
+;;       ((∀ [A :type] (f A))) int) ⟶ (f int)
+
+;;; + <<<normalization|||(lambda (x)t)>>>: "all you can eat" beta-reduction
+
+
+
 ;;; # Entracte ...
 
 ;;; ## What we learned thus far ...
 
 ;;; ... that thanks to the Curry-Howard correspondence
-;;; a lambda-calculus with types may be used to:
+;;; a lambda-calculus with dependent types may be used to:
 
 ;;;   1) express logical <<<propositions as types|||(lambda(x)t)>>>
 
@@ -351,7 +375,7 @@
     (assume [x A
              y B]
       (have <b> A :by x)
-      (have <c> (==> A B A) :discharge [x y <b>]))
+      (have <c> (==> A B A) :discharge [x y <b>])) ;; (λ [x A] (λ [y B] x))
     "Now we can use <a> as a function"
     (have <d> A :by (<a> <c>))
     (qed <d>)))
@@ -408,15 +432,14 @@
     (assume [x T
              y T
              Hxy (equal V (f (g x)) (f (g y)))]
-      
+
       "Since f is injective we have: g(x) = g(y)."
       (have <a> (equal U (g x) (g y))
             :by (Hf (g x) (g y) Hxy))
       
       "And since g is also injective we obtain: x = y."
-      (have <b> (equal T x y)
-            :by (Hg x y <a>))
-
+      (have <b> (equal T x y) :by (Hg x y <a>))
+      
       "Since x and y are arbitrary, f°g is thus injective."
       (have <c> (injective T V (λ [x T] (f (g x))))
             :discharge [x y Hxy <b>]))
