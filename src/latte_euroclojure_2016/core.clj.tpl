@@ -283,7 +283,7 @@
 
 ;;; ### Our objectives (in the few minutes to come):
 
-;;; 1) a bit of logic: <<<natural deduction|||(lambda (x) t)>>> (logic)
+;;; 1) a bit of logic: <<<natural deduction|||(lambda (x) t)>>>
 
 ;;; 2) a taste of "real" mathematics: <<<injectivity|||(lambda (x) t)>>>
 

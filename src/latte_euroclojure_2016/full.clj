@@ -205,7 +205,7 @@
  (λ [H1 (∀ [t Thing]
          (==> (man t) (mortal t)))]
     (λ [H2 (man socrates)]
-       ((H1 socrates) ;; (==> (man socrates) (mortal socrates))
+       ((H1 socrates)  ;; (==> (man socrates) (mortal socrates))
         H2)))
  
  ;; ^^^ Was Aristotle right? ^^^
@@ -290,7 +290,7 @@
 
 ;;; ### Our objectives (in the few minutes to come):
 
-;;; 1) a bit of logic: <<<natural deduction|||(lambda (x) t)>>> (logic)
+;;; 1) a bit of logic: <<<natural deduction|||(lambda (x) t)>>> 
 
 ;;; 2) a taste of "real" mathematics: <<<injectivity|||(lambda (x) t)>>>
 
@@ -375,7 +375,7 @@
     (assume [x A
              y B]
       (have <b> A :by x)
-      (have <c> (==> A B A) :discharge [x y <b>])) ;; (λ [x A] (λ [y B] x))
+      (have <c> (==> A B A) :discharge [x y <b>]))
     "Now we can use <a> as a function"
     (have <d> A :by (<a> <c>))
     (qed <d>)))
@@ -425,6 +425,7 @@
   "Our hypothesis is that f and g are injective."
   (assume [Hf (injective U V f)
            Hg (injective T U g)]
+    
     "We then have to prove that the composition is injective."
 
     "For this we consider two arbitrary elements x and y
@@ -438,8 +439,9 @@
             :by (Hf (g x) (g y) Hxy))
       
       "And since g is also injective we obtain: x = y."
-      (have <b> (equal T x y) :by (Hg x y <a>))
-      
+      (have <b> (equal T x y)
+            :by (Hg x y <a>))
+
       "Since x and y are arbitrary, f°g is thus injective."
       (have <c> (injective T V (λ [x T] (f (g x))))
             :discharge [x y Hxy <b>]))
