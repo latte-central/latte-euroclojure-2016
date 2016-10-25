@@ -78,7 +78,7 @@
 ((((fn [f] (fn [g] (fn [x] (g (f x)))))
    even?)                               ;; (==> int boolean)
    (fn [y] (if y "even" "odd")))        ;; (==> boolean String)
- 42)
+ 41)
 
 
 
@@ -205,7 +205,7 @@
  (λ [H1 (∀ [t Thing]
          (==> (man t) (mortal t)))]
     (λ [H2 (man socrates)]
-       ((H1 socrates)  ;; (==> (man socrates) (mortal socrates))
+       ((H1 socrates) ;; (==> (man socrates) (mortal socrates))
         H2)))
  
  ;; ^^^ Was Aristotle right? ^^^
@@ -215,30 +215,6 @@
       (man socrates)
       ;; thus
       (mortal socrates)))
-
-
-
-;;; # The rules of the games ...
-;; a.k.a. The LaTTe (kernel) calculus
-
-;;; ### Syntax
-;;; - <<<the type of types|||(lambda (x)t)>>>: :type (or ✳)
-;;; - <<<the type of :type|||(lambda (x)t)>>>: :kind (or □)
-;;; - <<<variables|||(lambda (x)t)>>>:  x, y, etc..
-;;; - <<<abstractions|||(lambda (x)t)>>>: (λ [x <type>] <body>)
-;;; - <<<products|||(lambda (x)t)>>>: (∀ [x <type>] <type>)
-;;; - <<<applications|||(lambda (x)t)>>>: (<fun> <arg>)
-
-;;; ### Alpha-conversion and equivalence
-;;; t1 = t2  if they are the same up-to renaming of bound variables
-;; e.g.:  (λ [x A] x) = (λ [y A] y)
-
-;;; ### Beta-reduction (≅semantics)
-;;; ((λ [x <type>] <body>) <arg>) ⟶ <body>{<arg>/x}
-;; e.g.: ((λ [x A] (y x)) (a b)) ⟶ (y (a b))
-;;       ((∀ [A :type] (f A))) int) ⟶ (f int)
-
-;;; + <<<normalization|||(lambda (x)t)>>>: "all you can eat" beta-reduction
 
 
 
@@ -290,7 +266,7 @@
 
 ;;; ### Our objectives (in the few minutes to come):
 
-;;; 1) a bit of logic: <<<natural deduction|||(lambda (x) t)>>> 
+;;; 1) a bit of logic: <<<natural deduction|||(lambda (x) t)>>>
 
 ;;; 2) a taste of "real" mathematics: <<<injectivity|||(lambda (x) t)>>>
 
@@ -375,7 +351,7 @@
     (assume [x A
              y B]
       (have <b> A :by x)
-      (have <c> (==> A B A) :discharge [x y <b>]))
+      (have <c> (==> A B A) :discharge [x y <b>])) ;; (λ [x A] (λ [x B] x))
     "Now we can use <a> as a function"
     (have <d> A :by (<a> <c>))
     (qed <d>)))
@@ -425,7 +401,6 @@
   "Our hypothesis is that f and g are injective."
   (assume [Hf (injective U V f)
            Hg (injective T U g)]
-    
     "We then have to prove that the composition is injective."
 
     "For this we consider two arbitrary elements x and y
@@ -433,7 +408,7 @@
     (assume [x T
              y T
              Hxy (equal V (f (g x)) (f (g y)))]
-
+      
       "Since f is injective we have: g(x) = g(y)."
       (have <a> (equal U (g x) (g y))
             :by (Hf (g x) (g y) Hxy))
@@ -441,13 +416,13 @@
       "And since g is also injective we obtain: x = y."
       (have <b> (equal T x y)
             :by (Hg x y <a>))
-
+      
       "Since x and y are arbitrary, f°g is thus injective."
       (have <c> (injective T V (λ [x T] (f (g x))))
             :discharge [x y Hxy <b>]))
-
-    "Which is enough to conclude the proof."
     (qed <c>)))
+
+ 
 
 
 

@@ -211,30 +211,6 @@
 
 
 
-;;; # The rules of the games ...
-;; a.k.a. The LaTTe (kernel) calculus
-
-;;; ### Syntax
-;;; - <<<the type of types|||(lambda (x)t)>>>: :type (or ✳)
-;;; - <<<the type of :type|||(lambda (x)t)>>>: :kind (or □)
-;;; - <<<variables|||(lambda (x)t)>>>:  x, y, etc..
-;;; - <<<abstractions|||(lambda (x)t)>>>: (λ [x <type>] <body>)
-;;; - <<<products|||(lambda (x)t)>>>: (∀ [x <type>] <type>)
-;;; - <<<applications|||(lambda (x)t)>>>: (<fun> <arg>)
-
-;;; ### Alpha-conversion and equivalence
-;;; t1 = t2  if they are the same up-to renaming of bound variables
-;; e.g.:  (λ [x A] x) = (λ [y A] y)
-
-;;; ### Beta-reduction (≅semantics)
-;;; ((λ [x <type>] <body>) <arg>) ⟶ <body>{<arg>/x}
-;; e.g.: ((λ [x A] (y x)) (a b)) ⟶ (y (a b))
-;;       ((∀ [A :type] (f A))) int) ⟶ (f int)
-
-;;; + <<<normalization|||(lambda (x)t)>>>: "all you can eat" beta-reduction
-
-
-
 ;;; # Entracte ...
 
 ;;; ## What we learned thus far ...
@@ -381,7 +357,7 @@
 
 ;; We have:
 ;; intro in Latte: (λ [x A] (λ [y B] (λ [C :type] (λ [f (==> A B C)] ((f x) y))))
-(def intro ✳)
+(def intro (fn [x] (fn [y] (fn [f] ((f x) y)))))
 
 ;; elim-left: (λ [p (and- A B)] ((p A) (λ [x A] (λ [y B] x))))
 (def left (fn [p] (p (fn [x] (fn [y] x)))))
