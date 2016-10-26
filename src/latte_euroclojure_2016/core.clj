@@ -2,7 +2,7 @@
 ;;; # Live-coding Mathematics
 ;;; ## Your first Clojure proofs
 
-;;  using the LaTTe proof assistant: <<<https://github.com/fredokun/LaTTe|||(lambda (x) (browse-url "https://github.com/fredokun/LaTTe"))>>>
+;;  using the LaTTe proof assistant: <<<https://github.com/latte-central|||(lambda (x) (browse-url "https://github.com/latte-central"))>>>
 
          ;;;                  ((((
          ;;;                 ((((
@@ -14,6 +14,7 @@
          ;;;                `-----'  -Karl
 
 ;;; ### Frédéric Peschanski @ Euroclojure 2016
+;;;<<<https://github.com/fredokun|||(lambda (x) (browse-url "https://github.com/fredokun"))>>>
 
 ;;;  LIP6 (Computer science laboratory)
 ;;;  UPMC (University Pierre & Marie Curie, Paris - France)
@@ -238,7 +239,6 @@
 ;;; a tool that allows to formulate mathematical content on
 ;;; a computer, and assists in the mathematician's routine: proving things!
 
-
 ;;; ## About LaTTe
 ;;; LaTTe is a proof assistant implemented as a Clojure library
 ;;; with top-level forms for axioms, definitions, theorems and proofs.
@@ -247,11 +247,14 @@
 ;;; ## Notable features
 
 ;;; - any Clojure Development environment can be used to do maths!
-;; (e.g. I use both Cider and Gorilla Repl, sometimes together via nrepl...)
+;; e.g. I use both Cider and Gorilla Repl, sometimes together via nrepl...
 
 ;;; - it leverages the Clojure (Clojars) ecosystem for <<<proving in the large|||t>>>
 
 ;;; - it supports a DSL for declarative proof scripts <<<<-- hot!|||t>>>
+
+;;; - it provides a very focused approach to proof automation <<<<-- new!|||t>>>
+;; unleash the full Clojure power to perform a proof step (cf. codox docs)
 
 
 
@@ -365,7 +368,7 @@
 ;; elim-left: (λ [p (and- A B)] ((p B) (λ [x A] (λ [y B] y))))
 (def right (fn [p] (p (fn [x] (fn [y] y)))))
 
-;; Have these functions any computational meaning?
+;; Does these functions have any computational meaning?
 
 (def p ((intro "hello") 42))
 (left p)
@@ -431,7 +434,7 @@
   "TODO")
 
 ;;;
-;;; ### Let's play together at: <<<https://github.com/fredokun/LaTTe|||(lambda(x)t)>>>
+;;; ### Let's play together at: <<<https://github.com/latte-central|||(lambda(x)t)>>>
 ;;; you're just a `lein new my-cool-maths-in-clojure` away...
 ;; (no? really? how unfortunate :~( )
 
