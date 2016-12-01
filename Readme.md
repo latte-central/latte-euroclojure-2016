@@ -31,7 +31,7 @@ And if you prefer the slides with solutions:
 sh run-emacs.sh src/latte_euroclojure_2016/full.clj &
 ```
 
-**Remark**: maybe it's simpler to wait for the video...
+**Remark**: maybe it's simpler to watch the video...
 
 ----
 The content is (C) 2016 Frederic Peschanski CC-BY-SA 4.0
