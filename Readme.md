@@ -3,7 +3,10 @@ LaTTe @ euroclojure 2016
 ========================
 
 This is the repository of the talk about LaTTe at
-the euroclojure 2016 conference...
+the EuroClojure 2016 conference...
+
+The video recording is available at: https://www.youtube.com/watch?v=5YTCY7wm0Nw
+(courtesy of the wonderful Cognitect people!)
 
 It is an emacs-based **livecoding** presentation. To see
 the slides, you'll need:
