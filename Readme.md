@@ -2,6 +2,8 @@
 LaTTe @ euroclojure 2016
 ========================
 
+**This branch contains the talk source as presented in 2016** (old and _deprecated_ version of LaTTe)
+
 This is the repository of the talk about LaTTe at
 the EuroClojure 2016 conference...
 
