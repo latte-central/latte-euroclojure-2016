@@ -53,8 +53,8 @@
   ;; LaTTe core and main top-level forms
   (:require [latte.core :as latte
              :refer [definition defthm defaxiom defnotation
-                     forall lambda ==>
-                     assume have proof try-proof
+                     forall lambda
+                     assume have qed proof try-proof
                      term type-of type-check?]]
 
   ;; ... the "standard" library (propositions, quantifiers and equality) 
