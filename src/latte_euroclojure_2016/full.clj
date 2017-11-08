@@ -318,13 +318,13 @@
   (==> A B
        (and- A B)))
 
-(proof and-intro-
+(proof 'and-intro-
     :term
-  (λ [x A]
-    (λ [y B]
-       (λ [C :type]
-          (λ [f (==> A B C)]
-             ((f x) y))))))
+  '(λ [x A]
+     (λ [y B]
+        (λ [C :type]
+           (λ [f (==> A B C)]
+              ((f x) y))))))
 
 
 
@@ -341,8 +341,8 @@
    (==> (and- A B)
         A))
 
-(proof and-elim-left-
-  :script
+(proof 'and-elim-left-
+    :script
   "Our hypothesis"     
   (assume [p (and- A B)]
     "The starting point: use the definition of conjunction."
@@ -350,11 +350,10 @@
     "We need to prove that if A is true and B is true then A is true"
     (assume [x A
              y B]
-      (have <b> A :by x)
-      (have <c> (==> A B A) :discharge [x y <b>])) ;; (λ [x A] (λ [x B] x))
+      (have <b> A :by x)) ;; discharge x, y: (λ [x A] (λ [x B] x))
     "Now we can use <a> as a function"
-    (have <d> A :by (<a> <c>))
-    (qed <d>)))
+    (have <c> A :by (<a> <b>)))
+  (qed <c>))
 
 ;; exercice : and-elim-right-  (solution? p/and-elim-right)
 
@@ -386,8 +385,8 @@
 (definition injective
   "A function f is injective iff for ∀x,y, f(x)=f(y) ⟹ x=y."
   [[T :type] [U :type] [f (==> T U)]]
-  (∀ [x y T] (==> (equal U (f x) (f y))
-                  (equal T x y))))
+  (∀ [x y T] (==> (equal (f x) (f y))
+                  (equal x y))))
 
 (defthm compose-injective
   "if f and g are injective functions, then f°g is injective too"
@@ -396,7 +395,7 @@
        (injective T U g)
        (injective T V (λ [x T] (f (g x))))))
 
-(proof compose-injective
+(proof 'compose-injective
     :script
   "Our hypothesis is that f and g are injective."
   (assume [Hf (injective U V f)
@@ -407,22 +406,20 @@
  such that f(g(x)) = f(g(y))"
     (assume [x T
              y T
-             Hxy (equal V (f (g x)) (f (g y)))]
+             Hxy (equal (f (g x)) (f (g y)))]
       
       "Since f is injective we have: g(x) = g(y)."
-      (have <a> (equal U (g x) (g y))
+      (have <a> (equal (g x) (g y))
             :by (Hf (g x) (g y) Hxy))
       
       "And since g is also injective we obtain: x = y."
-      (have <b> (equal T x y)
-            :by (Hg x y <a>))
+      (have <b> (equal x y)
+            :by (Hg x y <a>)))
       
-      "Since x and y are arbitrary, f°g is thus injective."
-      (have <c> (injective T V (λ [x T] (f (g x))))
-            :discharge [x y Hxy <b>]))
-    (qed <c>)))
+    "Since x and y are arbitrary, f°g is thus injective."
+    (have <c> (injective T V (λ [x T] (f (g x)))) :by <b>))
+  (qed <c>))
 
- 
 
 
 

@@ -2,7 +2,7 @@
 ;;; # Live-coding Mathematics
 ;;; ## Your first Clojure proofs
 
-;;  using the LaTTe proof assistant: <<<https://github.com/latte-central|||(lambda (x) (browse-url "https://github.com/latte-central"))>>>
+;;  using the LaTTe proof assistant: <<<https://github.com/fredokun/LaTTe|||(lambda (x) (browse-url "https://github.com/fredokun/LaTTe"))>>>
 
          ;;;                  ((((
          ;;;                 ((((
@@ -14,7 +14,6 @@
          ;;;                `-----'  -Karl
 
 ;;; ### Frédéric Peschanski @ Euroclojure 2016
-;;;<<<https://github.com/fredokun|||(lambda (x) (browse-url "https://github.com/fredokun"))>>>
 
 ;;;  LIP6 (Computer science laboratory)
 ;;;  UPMC (University Pierre & Marie Curie, Paris - France)
@@ -54,8 +53,8 @@
   ;; LaTTe core and main top-level forms
   (:require [latte.core :as latte
              :refer [definition defthm defaxiom defnotation
-                     forall lambda ==>
-                     assume have proof try-proof
+                     forall lambda
+                     assume have qed proof try-proof
                      term type-of type-check?]]
 
   ;; ... the "standard" library (propositions, quantifiers and equality) 
@@ -79,7 +78,7 @@
 ((((fn [f] (fn [g] (fn [x] (g (f x)))))
    even?)                               ;; (==> int boolean)
    (fn [y] (if y "even" "odd")))        ;; (==> boolean String)
- 42)
+ 41)
 
 
 
@@ -123,8 +122,8 @@
 
 
 (term
-  ✳
-  ;; ^^^ (fn [x] x) in LaTTe ^^^
+ ✳
+ ;; ^^^ (fn [x] x) in LaTTe ^^^
 )
 
 
@@ -142,7 +141,8 @@
 
  ;; is of type ...
 
- ✳)
+ ✳
+ )
 
 
 
@@ -239,6 +239,7 @@
 ;;; a tool that allows to formulate mathematical content on
 ;;; a computer, and assists in the mathematician's routine: proving things!
 
+
 ;;; ## About LaTTe
 ;;; LaTTe is a proof assistant implemented as a Clojure library
 ;;; with top-level forms for axioms, definitions, theorems and proofs.
@@ -247,14 +248,11 @@
 ;;; ## Notable features
 
 ;;; - any Clojure Development environment can be used to do maths!
-;; e.g. I use both Cider and Gorilla Repl, sometimes together via nrepl...
+;; (e.g. I use both Cider and Gorilla Repl, sometimes together via nrepl...)
 
 ;;; - it leverages the Clojure (Clojars) ecosystem for <<<proving in the large|||t>>>
 
 ;;; - it supports a DSL for declarative proof scripts <<<<-- hot!|||t>>>
-
-;;; - it provides a very focused approach to proof automation <<<<-- new!|||t>>>
-;; unleash the full Clojure power to perform a proof step (cf. codox docs)
 
 
 
@@ -314,13 +312,13 @@
   (==> A B
        (and- A B)))
 
-(proof and-intro-
+(proof 'and-intro-
     :term
-  (λ [x A]
-    (λ [y B]
-       (λ [C :type]
-          (λ [f (==> A B C)]
-             ((f x) y))))))
+  '(λ [x A]
+     (λ [y B]
+        (λ [C :type]
+           (λ [f (==> A B C)]
+              ((f x) y))))))
 
 
 
@@ -337,8 +335,8 @@
    (==> (and- A B)
         A))
 
-(proof and-elim-left-
-  :script
+(proof 'and-elim-left-
+    :script
   "Our hypothesis"     
   (assume [p (and- A B)]
     "The starting point: use the definition of conjunction."
@@ -346,11 +344,10 @@
     "We need to prove that if A is true and B is true then A is true"
     (assume [x A
              y B]
-      (have <b> A :by x)
-      (have <c> (==> A B A) :discharge [x y <b>]))
+      (have <b> A :by x)) ;; discharge x, y: (λ [x A] (λ [x B] x))
     "Now we can use <a> as a function"
-    (have <d> A :by (<a> <c>))
-    (qed <d>)))
+    (have <c> A :by (<a> <b>)))
+  (qed <c>))
 
 ;; exercice : and-elim-right-  (solution? p/and-elim-right)
 
@@ -368,7 +365,7 @@
 ;; elim-left: (λ [p (and- A B)] ((p B) (λ [x A] (λ [y B] y))))
 (def right (fn [p] (p (fn [x] (fn [y] y)))))
 
-;; Does these functions have any computational meaning?
+;; Have these functions any computational meaning?
 
 (def p ((intro "hello") 42))
 (left p)
@@ -434,7 +431,7 @@
   "TODO")
 
 ;;;
-;;; ### Let's play together at: <<<https://github.com/latte-central|||(lambda(x)t)>>>
+;;; ### Let's play together at: <<<https://github.com/fredokun/LaTTe|||(lambda(x)t)>>>
 ;;; you're just a `lein new my-cool-maths-in-clojure` away...
 ;; (no? really? how unfortunate :~( )
 
