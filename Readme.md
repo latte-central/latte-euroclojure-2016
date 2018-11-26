@@ -8,6 +8,8 @@ the EuroClojure 2016 conference...
 The video recording is available at: https://www.youtube.com/watch?v=5YTCY7wm0Nw
 (courtesy of the wonderful Cognitect people!)
 
+**Important** : the version of LaTTe demonstrated in the video is quite old, many improvements have been implemented
+
 It is an emacs-based **livecoding** presentation. To see
 the slides, you'll need:
 
